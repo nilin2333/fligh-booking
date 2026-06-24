@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>帮助中心 - 机票预订系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            color: #fff;
+            font-size: 24px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .logo i {
+            margin-right: 10px;
+            font-size: 32px;
+        }
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        .nav-links li {
+            margin-left: 30px;
+        }
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 15px;
+            transition: opacity 0.3s ease;
+            position: relative;
+        }
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+        .nav-links a.active {
+            border-bottom: 2px solid #fff;
+            padding-bottom: 3px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            color: #fff;
+        }
+        .user-info span {
+            margin-right: 15px;
+        }
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        .user-avatar:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        .user-avatar i {
+            font-size: 18px;
+            color: #fff;
+        }
+        .user-dropdown {
+            position: relative;
+        }
+        .user-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 180px;
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .user-dropdown-menu.show {
+            display: block;
+            animation: dropdownFade 0.2s ease;
+        }
+        @keyframes dropdownFade {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .user-dropdown-menu::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            right: 15px;
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            transform: rotate(45deg);
+            box-shadow: -2px -2px 4px rgba(0,0,0,0.05);
+        }
+        .user-dropdown-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .user-dropdown-header .username {
+            font-weight: 500;
+            color: #333;
+        }
+        .user-dropdown-header .role {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+        .user-dropdown-menu button {
+            width: 100%;
+            padding: 12px 20px;
+            border: none;
+            background: none;
+            text-align: left;
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+            transition: background 0.2s;
+        }
+        .user-dropdown-menu button:hover {
+            background: #f5f5f5;
+        }
+        .user-dropdown-menu button i {
+            margin-right: 10px;
+            width: 16px;
+            color: #667eea;
+        }
+        .user-dropdown-menu hr {
+            border: none;
+            border-top: 1px solid #eee;
+            margin: 5px 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .help-header {
+            text-align: center;
+            padding: 40px 0;
+        }
+        .help-header h1 {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .help-header p {
+            color: #666;
+            font-size: 16px;
+        }
+        .search-box {
+            max-width: 600px;
+            margin: 0 auto 40px;
+            position: relative;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 30px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .search-box button {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: #fff;
+            cursor: pointer;
+        }
+        .help-section {
+            background: #fff;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        .help-section h2 {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .help-section h2 i {
+            color: #667eea;
+            margin-right: 10px;
+        }
+        .faq-item {
+            border-bottom: 1px solid #f0f0f0;
+            padding: 15px 0;
+        }
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+        .faq-question {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px 0;
+        }
+        .faq-question h3 {
+            font-size: 16px;
+            color: #333;
+            font-weight: 500;
+        }
+        .faq-question i {
+            color: #667eea;
+            transition: transform 0.3s;
+        }
+        .faq-question.active i {
+            transform: rotate(180deg);
+        }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .faq-answer.show {
+            max-height: 500px;
+        }
+        .faq-answer p {
+            padding: 15px 0;
+            color: #666;
+            line-height: 1.8;
+        }
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .contact-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8eaf6 100%);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .contact-card:hover {
+            transform: translateY(-5px);
+        }
+        .contact-card i {
+            font-size: 36px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        .contact-card h3 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .contact-card p {
+            color: #666;
+            font-size: 14px;
+        }
+        .guide-list {
+            list-style: none;
+        }
+        .guide-list li {
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .guide-list li:last-child {
+            border-bottom: none;
+        }
+        .guide-list li i {
+            color: #667eea;
+            font-size: 20px;
+        }
+        .guide-list li h4 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .guide-list li p {
+            color: #666;
+            font-size: 14px;
+        }
+        .profile-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            pointer-events: none;
+        }
+        .profile-modal-overlay.show {
+            display: flex;
+            animation: fadeIn 0.2s ease;
+            pointer-events: auto;
+        }
+        .profile-modal {
+            background: #fff;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: modalSlideUp 0.3s ease;
+        }
+        .profile-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .profile-modal-header h3 {
+            font-size: 20px;
+            color: #333;
+        }
+        .profile-close-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #f5f5f5;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            color: #666;
+            transition: all 0.2s;
+        }
+        .profile-close-btn:hover {
+            background: #e0e0e0;
+            transform: rotate(90deg);
+        }
+        .profile-info-list {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .profile-info-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+        .profile-info-item:hover {
+            background: #f0f4ff;
+        }
+        .profile-info-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        .profile-info-icon i {
+            font-size: 18px;
+            color: #fff;
+        }
+        .profile-info-content {
+            flex: 1;
+        }
+        .profile-info-label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 4px;
+        }
+        .profile-info-value {
+            font-size: 15px;
+            color: #333;
+            font-weight: 500;
+        }
+        .profile-edit-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #fff;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+        .profile-edit-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .confirm-modal {
+            background: #fff;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: modalSlideUp 0.3s ease;
+            text-align: center;
+            position: relative;
+            z-index: 10002;
+        }
+        .confirm-modal-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 28px;
+            color: #fff;
+        }
+        .confirm-modal h3 {
+            margin: 0 0 10px;
+            font-size: 20px;
+            color: #333;
+        }
+        .confirm-modal p {
+            margin: 0 0 25px;
+            color: #666;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        .confirm-modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        .confirm-modal-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+        .confirm-modal-btn.cancel {
+            background: #f5f5f5;
+            color: #666;
+        }
+        .confirm-modal-btn.cancel:hover {
+            background: #e0e0e0;
+        }
+        .confirm-modal-btn.danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: #fff;
+        }
+        .confirm-modal-btn.danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+        }
+        .success-modal {
+            background: #fff;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: modalSlideUp 0.3s ease;
+            text-align: center;
+            position: relative;
+            z-index: 10002;
+        }
+        .success-modal-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 28px;
+            color: #fff;
+        }
+        .success-modal h3 {
+            margin: 0 0 10px;
+            font-size: 20px;
+            color: #333;
+        }
+        .success-modal p {
+            margin: 0 0 25px;
+            color: #666;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        .success-modal-btn {
+            padding: 12px 40px;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            color: #fff;
+            transition: all 0.2s;
+        }
+        .success-modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease;
+            margin-left: 15px;
+        }
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .user-info span {
+            margin-right: 15px;
+            color: #fff;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes modalSlideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .footer {
+            background: #333;
+            color: #fff;
+            padding: 30px;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+        .footer-links a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .footer-links a:hover {
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="nav-container">
+            <a href="系统首页.html" class="logo">
+                <i class="fas fa-plane"></i>
+                <span>机票预订系统</span>
+            </a>
+            
+            <ul class="nav-links">
+                <li><a href="系统首页.html">首页</a></li>
+                <li><a href="机票查询页.html">机票查询</a></li>
+                <li><a href="我的订单页.html">我的订单</a></li>
+                <li><a href="乘客管理页.html">乘客管理</a></li>
+                <li><a href="消息中心页.html">消息中心</a></li>
+                <li><a href="帮助中心页.html" class="active">帮助中心</a></li>
+            </ul>
+
+            <div class="user-info">
+                <div class="user-dropdown">
+                    <div class="user-avatar" onclick="toggleUserMenu()">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-dropdown-menu" id="userDropdownMenu">
+                        <button class="dropdown-item" onclick="showProfile()">
+                            <i class="fas fa-user-circle"></i>个人信息
+                        </button>
+                        <button class="dropdown-item" onclick="showAccountManagement()">
+                            <i class="fas fa-cog"></i>账号管理
+                        </button>
+                    </div>
+                </div>
+                <span>欢迎, <span id="username">用户</span></span>
+                <button class="logout-btn" onclick="logout()">退出登录</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="help-header">
+            <h1><i class="fas fa-life-ring" style="color: #667eea;"></i> 帮助中心</h1>
+            <p>在这里找到常见问题的解答，如有其他疑问请联系客服</p>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="helpSearch" placeholder="搜索帮助内容..." onkeyup="searchHelp()">
+            <button onclick="searchHelp()"><i class="fas fa-search"></i></button>
+        </div>
+
+        <div class="help-section">
+            <h2><i class="fas fa-question-circle"></i> 常见问题</h2>
+            <div class="faq-list" id="faqList">
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <h3>如何查询和预订机票？</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>在首页或机票查询页输入出发城市、到达城市、出发日期等信息，点击"查询"按钮即可查看可用航班。选择心仪的航班后，点击"预订"按钮，填写乘客信息并完成支付即可成功预订。</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <h3>如何查看我的订单？</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>登录后，点击导航栏中的"我的订单"即可查看所有订单。您可以根据订单状态（待支付、已出票、已完成、已取消）进行筛选查看。</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <h3>如何取消订单？</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>在"我的订单"页面，找到需要取消的订单，点击"取消订单"按钮。请注意，已出票的订单可能需要按照航空公司的退改签政策执行，可能会产生一定的手续费。</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <h3>如何添加和管理乘客信息？</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>在"乘客管理"页面，点击"添加乘客"按钮，填写乘客的姓名、证件号码、联系方式等信息。您可以随时编辑或删除已添加的乘客信息，方便下次预订时快速选择。</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <h3>支持哪些支付方式？</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>目前系统支持多种支付方式，包括支付宝、微信支付、银联卡支付等。您可以根据自己的需求选择合适的支付方式完成订单支付。</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <h3>如何修改个人信息？</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>点击导航栏右侧的头像，选择"个人信息"，在弹出的窗口中点击需要修改的信息项旁边的"修改"按钮，输入新信息后保存即可。您也可以在此页面修改登录密码。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="help-section">
+            <h2><i class="fas fa-book"></i> 使用指南</h2>
+            <ul class="guide-list">
+                <li>
+                    <i class="fas fa-search"></i>
+                    <div>
+                        <h4>第一步：查询航班</h4>
+                        <p>输入出发地、目的地和出行日期，快速查询可用航班</p>
+                    </div>
+                </li>
+                <li>
+                    <i class="fas fa-ticket-alt"></i>
+                    <div>
+                        <h4>第二步：选择航班</h4>
+                        <p>比较不同航班的价格、时间，选择最适合的航班</p>
+                    </div>
+                </li>
+                <li>
+                    <i class="fas fa-user-plus"></i>
+                    <div>
+                        <h4>第三步：填写乘客信息</h4>
+                        <p>添加或选择已有乘客，确认证件信息准确无误</p>
+                    </div>
+                </li>
+                <li>
+                    <i class="fas fa-credit-card"></i>
+                    <div>
+                        <h4>第四步：完成支付</h4>
+                        <p>选择支付方式，在规定时间内完成订单支付</p>
+                    </div>
+                </li>
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    <div>
+                        <h4>第五步：出票成功</h4>
+                        <p>支付成功后系统将自动出票，可在"我的订单"中查看</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 个人信息弹窗 -->
+    <div class="profile-modal-overlay" id="profileModal">
+        <div class="profile-modal">
+            <div class="profile-modal-header">
+                <h3><i class="fas fa-user-circle" style="color: #667eea; margin-right: 10px;"></i>个人信息</h3>
+                <button class="profile-close-btn" onclick="closeProfileModal()">&times;</button>
+            </div>
+            <div class="profile-info-list">
+                <div class="profile-info-item">
+                    <div class="profile-info-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="profile-info-content">
+                        <div class="profile-info-label">用户名</div>
+                        <div class="profile-info-value" id="profileUsername">-</div>
+                    </div>
+                </div>
+                <div class="profile-info-item">
+                    <div class="profile-info-icon">
+                        <i class="fas fa-id-card"></i>
+                    </div>
+                    <div class="profile-info-content">
+                        <div class="profile-info-label">真实姓名</div>
+                        <div class="profile-info-value" id="profileRealName">-</div>
+                    </div>
+                    <button class="profile-edit-btn" onclick="editProfileField('realName')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+                <div class="profile-info-item">
+                    <div class="profile-info-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="profile-info-content">
+                        <div class="profile-info-label">邮箱</div>
+                        <div class="profile-info-value" id="profileEmail">-</div>
+                    </div>
+                    <button class="profile-edit-btn" onclick="editProfileField('email')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+                <div class="profile-info-item">
+                    <div class="profile-info-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div class="profile-info-content">
+                        <div class="profile-info-label">手机号</div>
+                        <div class="profile-info-value" id="profilePhone">-</div>
+                    </div>
+                    <button class="profile-edit-btn" onclick="editProfileField('phone')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+                <div class="profile-info-item">
+                    <div class="profile-info-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="profile-info-content">
+                        <div class="profile-info-label">账号状态</div>
+                        <div class="profile-info-value" id="profileStatus">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑个人信息弹窗 -->
+    <div class="profile-modal-overlay" id="editProfileModal">
+        <div class="profile-modal">
+            <div class="profile-modal-header">
+                <h3 id="editProfileTitle"><i class="fas fa-edit" style="color: #667eea; margin-right: 10px;"></i>编辑</h3>
+                <button class="profile-close-btn" onclick="closeEditProfileModal()">&times;</button>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; color: #666; font-size: 14px;">新值</label>
+                <input type="text" id="editProfileValue" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px; transition: all 0.2s;" onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='#e0e0e0'">
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button onclick="closeEditProfileModal()" style="padding: 10px 20px; border: none; background: #f5f5f5; border-radius: 8px; cursor: pointer; font-size: 15px; color: #666; transition: all 0.2s;">取消</button>
+                <button onclick="saveProfileEdit()" style="padding: 10px 20px; border: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; cursor: pointer; font-size: 15px; color: #fff; transition: all 0.2s;">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 账号管理弹窗 -->
+    <div class="profile-modal-overlay" id="accountManagementModal">
+        <div class="profile-modal">
+            <div class="profile-modal-header">
+                <h3><i class="fas fa-cog" style="color: #667eea; margin-right: 10px;"></i>账号管理</h3>
+                <button class="profile-close-btn" onclick="closeAccountManagementModal()">&times;</button>
+            </div>
+            <div class="profile-info-item" style="cursor: pointer;" onclick="showChangePasswordModal()">
+                <div class="profile-info-icon">
+                    <i class="fas fa-key"></i>
+                </div>
+                <div class="profile-info-content">
+                    <div class="profile-info-label">修改密码</div>
+                    <div class="profile-info-value">更改您的登录密码</div>
+                </div>
+                <i class="fas fa-chevron-right" style="color: #999; font-size: 14px;"></i>
+            </div>
+            <div class="profile-info-item" style="cursor: pointer;" onclick="showDeleteAccountConfirm()">
+                <div class="profile-info-icon" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);">
+                    <i class="fas fa-trash-alt"></i>
+                </div>
+                <div class="profile-info-content">
+                    <div class="profile-info-label">注销账号</div>
+                    <div class="profile-info-value" style="color: #ff6b6b;">永久删除您的账号</div>
+                </div>
+                <i class="fas fa-chevron-right" style="color: #999; font-size: 14px;"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改密码弹窗 -->
+    <div class="profile-modal-overlay" id="changePasswordModal">
+        <div class="profile-modal">
+            <div class="profile-modal-header">
+                <h3>修改密码</h3>
+                <button class="profile-close-btn" onclick="closeChangePasswordModal()">&times;</button>
+            </div>
+            <div style="padding: 10px 0;">
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 8px; color: #666; font-size: 14px;">当前密码</label>
+                    <input type="password" id="currentPassword" style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;" placeholder="请输入当前密码">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 8px; color: #666; font-size: 14px;">新密码</label>
+                    <input type="password" id="newPassword" style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;" placeholder="请输入新密码">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: #666; font-size: 14px;">确认新密码</label>
+                    <input type="password" id="confirmNewPassword" style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px;" placeholder="请再次输入新密码">
+                </div>
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <button onclick="closeChangePasswordModal()" style="padding: 10px 25px; border: none; background: #f5f5f5; border-radius: 8px; cursor: pointer; font-size: 14px; color: #666;">取消</button>
+                    <button onclick="savePasswordChange()" style="padding: 10px 25px; border: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; cursor: pointer; font-size: 14px; color: #fff;">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 退出登录确认弹窗 -->
+    <div class="profile-modal-overlay" id="logoutModal">
+        <div class="confirm-modal">
+            <div class="confirm-modal-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <i class="fas fa-sign-out-alt"></i>
+            </div>
+            <h3>退出登录</h3>
+            <p>确定要退出登录吗？</p>
+            <div class="confirm-modal-buttons">
+                <button class="confirm-modal-btn cancel" onclick="closeLogoutModal()">取消</button>
+                <button class="confirm-modal-btn danger" onclick="confirmLogout()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">确认退出</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 注销账号确认弹窗 -->
+    <div class="profile-modal-overlay" id="deleteAccountModal" style="z-index: 3000;">
+        <div class="confirm-modal">
+            <div class="confirm-modal-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3>注销账号</h3>
+            <p>确定要注销此账号吗？<br>此操作不可恢复，所有数据将被永久删除！</p>
+            <div class="confirm-modal-buttons">
+                <button class="confirm-modal-btn cancel" onclick="closeDeleteAccountModal()">取消</button>
+                <button class="confirm-modal-btn danger" onclick="confirmDeleteAccount()">确认注销</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 成功提示弹窗 -->
+    <div class="profile-modal-overlay" id="successModal">
+        <div class="success-modal">
+            <div class="success-modal-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <h3 id="successTitle">操作成功</h3>
+            <p id="successMessage">操作已成功完成</p>
+            <button class="success-modal-btn" onclick="closeSuccessModal()">确定</button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="#">关于我们</a>
+            <a href="#">服务条款</a>
+            <a href="#">隐私政策</a>
+            <a href="#">帮助中心</a>
+        </div>
+        <p>&copy; 2025 机票预订系统 版权所有</p>
+    </footer>
+
+    <script>
+        // 获取URL参数中的用户名
+        function getUrlParam(name) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(name);
+        }
+
+        // 页面加载时检查登录状态并显示用户名
+        document.addEventListener('DOMContentLoaded', function() {
+            const userId = sessionStorage.getItem('userId') || localStorage.getItem('userId');
+            if (!userId) {
+                window.location.href = '系统登录页.html';
+                return;
+            }
+            
+            // 设置用户名显示
+            const username = getUrlParam('username') || sessionStorage.getItem('username') || '用户';
+            document.getElementById('username').textContent = username;
+            
+            // 动态更新所有导航链接，添加用户名参数
+            const navLinks = document.querySelectorAll('.nav-links a');
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && href !== '#' && !href.includes('username=')) {
+                    link.setAttribute('href', href + '?username=' + encodeURIComponent(username));
+                }
+            });
+            
+            // 更新logo链接
+            const logoLink = document.querySelector('.logo');
+            if (logoLink) {
+                const href = logoLink.getAttribute('href');
+                if (href && !href.includes('username=')) {
+                    logoLink.setAttribute('href', href + '?username=' + encodeURIComponent(username));
+                }
+            }
+            
+            loadUserProfile();
+        });
+
+        // 切换用户菜单
+        function toggleUserMenu() {
+            const dropdown = document.getElementById('userDropdownMenu');
+            dropdown.classList.toggle('show');
+        }
+
+        // 点击其他地方关闭菜单
+        document.addEventListener('click', function(e) {
+            const userDropdown = document.querySelector('.user-dropdown');
+            if (userDropdown && !userDropdown.contains(e.target)) {
+                document.getElementById('userDropdownMenu').classList.remove('show');
+            }
+        });
+
+        // 加载用户信息
+        function loadUserProfile() {
+            const userId = sessionStorage.getItem('userId') || localStorage.getItem('userId') || 1;
+            fetch(`http://localhost:8080/flight-booking/api/users/${userId}`)
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success) {
+                        const user = result.data;
+                        document.getElementById('profileUsername').textContent = user.username || '-';
+                        document.getElementById('profileRealName').textContent = user.realName || '未设置';
+                        document.getElementById('profileEmail').textContent = user.email || '未设置';
+                        document.getElementById('profilePhone').textContent = user.phone || '未设置';
+                        document.getElementById('profileStatus').textContent = user.status === 1 ? '正常' : '已禁用';
+                    }
+                })
+                .catch(error => {
+                    console.error('加载用户信息失败:', error);
+                });
+        }
+
+        // 显示个人信息
+        function showProfile() {
+            document.getElementById('profileModal').classList.add('show');
+            document.getElementById('userDropdown').classList.remove('show');
+        }
+
+        // 关闭个人信息弹窗
+        function closeProfileModal() {
+            document.getElementById('profileModal').classList.remove('show');
+        }
+
+        // 编辑个人信息字段
+        let currentEditField = '';
+        function editProfileField(field) {
+            currentEditField = field;
+            const fieldNames = {
+                'realName': '真实姓名',
+                'email': '邮箱',
+                'phone': '手机号'
+            };
+            document.getElementById('editProfileTitle').innerHTML = '<i class="fas fa-edit" style="color: #667eea; margin-right: 10px;"></i>编辑' + (fieldNames[field] || field);
+            document.getElementById('editProfileValue').value = document.getElementById('profile' + field.charAt(0).toUpperCase() + field.slice(1)).textContent;
+            document.getElementById('editProfileModal').classList.add('show');
+        }
+
+        // 关闭编辑弹窗
+        function closeEditProfileModal() {
+            document.getElementById('editProfileModal').classList.remove('show');
+            currentEditField = '';
+        }
+
+        // 保存编辑
+        function saveProfileEdit() {
+            const newValue = document.getElementById('editProfileInput').value.trim();
+            if (!newValue) {
+                alert('输入不能为空');
+                return;
+            }
+
+            if (currentEditField === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newValue)) {
+                alert('邮箱格式不正确');
+                return;
+            }
+
+            if (currentEditField === 'phone' && !/^1[3-9]\d{9}$/.test(newValue)) {
+                alert('手机号格式不正确');
+                return;
+            }
+
+            const userId = sessionStorage.getItem('userId') || localStorage.getItem('userId');
+            const updateData = {};
+            updateData[currentEditField] = newValue;
+
+            fetch(`http://localhost:8080/flight-booking/api/users/${userId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updateData)
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    closeEditProfileModal();
+                    loadUserProfile();
+                    showSuccessModal('修改成功', '个人信息已更新');
+                } else {
+                    alert('修改失败: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('修改失败:', error);
+                alert('修改失败，请检查网络连接');
+            });
+        }
+
+        // 显示账号管理
+        function showAccountManagement() {
+            document.getElementById('accountManagementModal').classList.add('show');
+            document.getElementById('userDropdown').classList.remove('show');
+        }
+
+        // 关闭账号管理弹窗
+        function closeAccountManagementModal() {
+            document.getElementById('accountManagementModal').classList.remove('show');
+        }
+
+        // 显示修改密码弹窗
+        function showChangePasswordModal() {
+            document.getElementById('changePasswordModal').style.zIndex = '4000';
+            document.getElementById('changePasswordModal').classList.add('show');
+        }
+
+        // 关闭修改密码弹窗
+        function closeChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.remove('show');
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+        }
+
+        // 保存密码修改
+        function savePasswordChange() {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+            if (!currentPassword || !newPassword || !confirmNewPassword) {
+                alert('请填写所有字段');
+                return;
+            }
+
+            if (newPassword !== confirmNewPassword) {
+                alert('两次输入的新密码不一致');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                alert('新密码长度不能少于6位');
+                return;
+            }
+
+            const userId = sessionStorage.getItem('userId') || localStorage.getItem('userId');
+            fetch(`http://localhost:8080/flight-booking/api/users/${userId}/password`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ oldPassword: currentPassword, newPassword: newPassword })
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    closeChangePasswordModal();
+                    closeAccountManagementModal();
+                    showSuccessModal('密码修改成功', '请重新登录');
+                    setTimeout(() => {
+                        logout();
+                    }, 1500);
+                } else {
+                    alert('密码修改失败: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('密码修改失败:', error);
+                alert('密码修改失败，请检查网络连接');
+            });
+        }
+
+        // 显示注销账号确认
+        function showDeleteAccountConfirm() {
+            document.getElementById('deleteAccountModal').classList.add('show');
+        }
+
+        // 关闭注销账号确认弹窗
+        function closeDeleteAccountModal() {
+            document.getElementById('deleteAccountModal').classList.remove('show');
+        }
+
+        // 确认注销账号
+        function confirmDeleteAccount() {
+            const userId = sessionStorage.getItem('userId') || localStorage.getItem('userId');
+            fetch(`http://localhost:8080/flight-booking/api/users/${userId}`, {
+                method: 'DELETE'
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    closeDeleteAccountModal();
+                    closeAccountManagementModal();
+                    showSuccessModal('账号已注销', '您的账号已成功注销');
+                    setTimeout(() => {
+                        logout();
+                    }, 1500);
+                } else {
+                    alert('账号注销失败: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('账号注销失败:', error);
+                alert('账号注销失败，请检查网络连接');
+            });
+        }
+
+        // 显示成功提示
+        function showSuccessModal(title, message) {
+            document.getElementById('successTitle').textContent = title || '操作成功';
+            document.getElementById('successMessage').textContent = message || '操作已成功完成';
+            document.getElementById('successModal').style.zIndex = '5000';
+            document.getElementById('successModal').classList.add('show');
+        }
+
+        // 关闭成功提示弹窗
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.remove('show');
+        }
+
+        // 退出登录
+        function logout() {
+            document.getElementById('logoutModal').style.zIndex = '3500';
+            document.getElementById('logoutModal').classList.add('show');
+        }
+
+        // 关闭退出登录弹窗
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').classList.remove('show');
+        }
+
+        // 确认退出登录
+        function confirmLogout() {
+            closeLogoutModal();
+            localStorage.removeItem('token');
+            localStorage.removeItem('username');
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('username');
+            window.location.href = '系统登录页.html';
+        }
+
+        // FAQ展开/收起
+        function toggleFaq(element) {
+            const answer = element.nextElementSibling;
+            const isActive = element.classList.contains('active');
+            
+            // 关闭所有
+            document.querySelectorAll('.faq-question').forEach(q => q.classList.remove('active'));
+            document.querySelectorAll('.faq-answer').forEach(a => a.classList.remove('show'));
+            
+            // 如果当前未展开则展开
+            if (!isActive) {
+                element.classList.add('active');
+                answer.classList.add('show');
+            }
+        }
+
+        // 搜索帮助内容
+        function searchHelp() {
+            const keyword = document.getElementById('helpSearch').value.toLowerCase().trim();
+            if (!keyword) return;
+
+            const faqItems = document.querySelectorAll('.faq-item');
+            let found = false;
+
+            faqItems.forEach(item => {
+                const question = item.querySelector('.faq-question h3').textContent.toLowerCase();
+                const answer = item.querySelector('.faq-answer p').textContent.toLowerCase();
+                
+                if (question.includes(keyword) || answer.includes(keyword)) {
+                    item.style.display = 'block';
+                    found = true;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            if (!found) {
+                alert('未找到相关帮助内容，请尝试其他关键词或联系客服');
+            }
+        }
+
+        // 点击弹窗外部关闭
+        document.querySelectorAll('.profile-modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('show');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

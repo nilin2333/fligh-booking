@@ -1,0 +1,3815 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员控制台 - 机票预订系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Microsoft YaHe', 'PingFang SC', sans-serif; 
+            background: #f5f7fa; 
+            min-height: 100vh;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            color: #fff;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .logo i { margin-right: 10px; }
+        .user-info {
+            display: flex;
+            align-items: center;
+            color: #fff;
+        }
+        .user-info span { margin-right: 15px; }
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        .logout-btn:hover { background: rgba(255,255,255,0.3); }
+        
+        .dashboard {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 30px;
+        }
+        .dashboard-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .stat-icon {
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 15px;
+        }
+        .nav-tabs button {
+            padding: 10px 25px;
+            border: none;
+            background: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.3s;
+        }
+        .nav-tabs button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+        .nav-tabs button:hover:not(.active) {
+            background: #f0f0f0;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .filter-group label {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+        .filter-group select {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #333;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .filter-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .content-panel {
+            background: #fff;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        th {
+            background: #f8f9ff;
+            font-weight: 600;
+            color: #333;
+        }
+        tr:hover {
+            background: #fafafa;
+        }
+        .action-btn {
+            padding: 6px 15px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            border: none;
+            margin-right: 8px;
+            transition: all 0.3s;
+        }
+        .action-btn.edit {
+            background: #667eea;
+            color: #fff;
+        }
+        .action-btn.delete {
+            background: #ffcdd2;
+            color: #e53935;
+        }
+        .action-btn.change {
+            background: #ffb74d;
+            color: #e65100;
+        }
+        .action-btn.view {
+            background: #81c784;
+            color: #2e7d32;
+        }
+        .action-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        /* 管理员预订功能样式 */
+        .search-section-admin {
+            padding: 0; 
+            margin-bottom: 20px;
+        }
+        .search-container-admin {
+            background: #fff;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+        .search-form-admin {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: flex-end;
+        }
+        .form-group-admin {
+            flex: 1;
+            min-width: 140px;
+        }
+        .form-group-admin label {
+            display: block;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .form-group-admin input, .form-group-admin select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .form-group-admin input:focus, .form-group-admin select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .user-select-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .user-select-wrapper input {
+            flex: 1;
+        }
+        .search-user-btn {
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: #f5f7fa;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .search-user-btn:hover {
+            background: #e0e0e0;
+            border-color: #667eea;
+        }
+        .switch-btn-admin {
+            background: #f5f7fa;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .switch-btn-admin:hover {
+            background: #e0e0e0;
+        }
+        .search-btn-admin {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .search-btn-admin:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        .search-btn-admin:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .results-header-admin {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .results-title-admin {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        .results-count-admin {
+            color: #666;
+            font-size: 13px;
+        }
+        .flights-container-admin {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .flight-card-admin {
+            background: #fff;
+            border-radius: 10px;
+            padding: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s;
+        }
+        .flight-card-admin:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .flight-info-admin {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+        .city-info-admin {
+            text-align: center;
+            min-width: 85px;
+        }
+        .city-date-admin {
+            font-size: 11px;
+            color: #667eea;
+            margin-bottom: 3px;
+        }
+        .city-time-admin {
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+        }
+        .city-name-admin {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-top: 3px;
+        }
+        .city-code-admin {
+            font-size: 11px;
+            color: #999;
+        }
+        .route-arrow-admin {
+            font-size: 22px;
+            color: #667eea;
+            margin: 0 8px;
+        }
+        .flight-details-admin {
+            text-align: center;
+            min-width: 100px;
+        }
+        .flight-number-admin {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+        .airline-admin {
+            font-size: 11px;
+            color: #666;
+            margin-top: 3px;
+        }
+        .cabin-type-admin {
+            font-size: 11px;
+            color: #999;
+        }
+        .route-container-admin {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 60px;
+        }
+        .duration-admin {
+            font-size: 11px;
+            color: #667eea;
+            margin-bottom: 3px;
+        }
+        .price-info-admin {
+            text-align: right;
+        }
+        .price-admin {
+            font-size: 24px;
+            font-weight: 700;
+            color: #e74c3c;
+        }
+        .seats-info-admin {
+            font-size: 11px;
+            color: #666;
+            margin-top: 3px;
+        }
+        .book-btn-admin {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 15px;
+            transition: all 0.3s;
+        }
+        .book-btn-admin:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .book-btn-admin.disabled {
+            background: #ccc !important;
+            cursor: not-allowed !important;
+            opacity: 0.6;
+        }
+        .no-results-admin {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .no-results-icon-admin {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        .no-results-title-admin {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .no-results-desc-admin {
+            color: #666;
+            font-size: 13px;
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        .modal-content {
+            background: #fff;
+            border-radius: 16px;
+            max-width: 500px;
+            width: 100%;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 25px;
+            border-bottom: 1px solid #eee;
+        }
+        .modal-header h3 { font-size: 18px; font-weight: 600; }
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #999;
+            cursor: pointer;
+        }
+        .modal-body { 
+            padding: 25px; 
+            max-height: 60vh; 
+            overflow-y: auto;
+        }
+        .modal-body .form-group {
+            margin-bottom: 15px;
+        }
+        .modal-body label {
+            display: block;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .modal-body input, .modal-body select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+        .modal-footer {
+            display: flex;
+            gap: 15px;
+            padding: 20px 25px;
+            border-top: 1px solid #eee;
+        }
+        .modal-footer button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 15px;
+            cursor: pointer;
+            border: none;
+        }
+        .modal-footer .btn-cancel {
+            background: #f5f5f5;
+            color: #666;
+        }
+        .modal-footer .btn-confirm {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+        
+        /* 城市选择器样式 */
+        .city-select-wrapper {
+            position: relative;
+        }
+        .city-select-wrapper input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+        .city-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 1001;
+            display: none;
+        }
+        .city-dropdown.show {
+            display: block;
+        }
+        .city-dropdown-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .city-dropdown-item:last-child {
+            border-bottom: none;
+        }
+        .city-dropdown-item:hover {
+            background: #f5f7fa;
+        }
+        .city-dropdown-item .city-name {
+            font-weight: 500;
+            color: #333;
+        }
+        .city-dropdown-item .airport-code {
+            color: #999;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="nav-container">
+            <div class="logo"><i>🛠️</i><span>管理员控制台</span></div>
+            <div class="user-info">
+                <span>欢迎, <span id="username">管理员</span></span>
+                <button class="logout-btn" onclick="logout()">退出登录</button>
+            </div>
+        </div>
+    </header>
+    
+    <div class="dashboard">
+        <h2 class="dashboard-title">📊 数据概览</h2>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">✈️</div>
+                <div class="stat-value" id="totalFlights">0</div>
+                <div class="stat-label">航班总数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📋</div>
+                <div class="stat-value" id="totalOrders">0</div>
+                <div class="stat-label">订单总数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-value" id="totalUsers">0</div>
+                <div class="stat-label">用户总数</div>
+            </div>
+        </div>
+        
+        <div class="nav-tabs">
+            <button class="active" onclick="showTab('flights')">航班管理</button>
+            <button onclick="showTab('booking')">机票预订</button>
+            <button onclick="showTab('orders')">订单管理</button>
+            <button onclick="showTab('users')">用户管理</button>
+            <button onclick="showTab('admins')">管理员管理</button>
+        </div>
+        
+        <!-- 机票预订面板 -->
+        <div class="content-panel" id="bookingPanel" style="display: none;">
+            <!-- 搜索区域 -->
+            <div class="search-section-admin">
+                <div class="search-container-admin">
+                    <form class="search-form-admin" id="searchFormAdmin">
+                        <div class="form-group-admin">
+                            <label for="bookingDeparture">出发城市</label>
+                            <select id="bookingDeparture">
+                                <option value="">请选择出发城市</option>
+                                <option value="北京">北京 (PEK)</option>
+                                <option value="上海">上海 (SHA)</option>
+                                <option value="广州">广州 (CAN)</option>
+                                <option value="深圳">深圳 (SZX)</option>
+                                <option value="成都">成都 (CTU)</option>
+                                <option value="杭州">杭州 (HGH)</option>
+                                <option value="西安">西安 (XIY)</option>
+                                <option value="重庆">重庆 (CKG)</option>
+                            </select>
+                        </div>
+                        <button type="button" class="switch-btn-admin" onclick="switchBookingCities()">↔️</button>
+                        <div class="form-group-admin">
+                            <label for="bookingDestination">到达城市</label>
+                            <select id="bookingDestination">
+                                <option value="">请选择到达城市</option>
+                                <option value="北京">北京 (PEK)</option>
+                                <option value="上海">上海 (SHA)</option>
+                                <option value="广州">广州 (CAN)</option>
+                                <option value="深圳">深圳 (SZX)</option>
+                                <option value="成都">成都 (CTU)</option>
+                                <option value="杭州">杭州 (HGH)</option>
+                                <option value="西安">西安 (XIY)</option>
+                                <option value="重庆">重庆 (CKG)</option>
+                            </select>
+                        </div>
+                        <div class="form-group-admin">
+                            <label for="bookingDepartDate">出发日期</label>
+                            <input type="date" id="bookingDepartDate">
+                        </div>
+                        <div class="form-group-admin">
+                            <label for="bookingSortBy">排序方式</label>
+                            <select id="bookingSortBy">
+                                <option value="departureTime">按出发时间</option>
+                                <option value="duration">按经过时间</option>
+                                <option value="price">按票价</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="search-btn-admin" id="searchBtnAdmin">搜索机票</button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- 搜索结果 -->
+            <div class="results-section-admin" id="bookingResultsSection" style="display: none; margin-top: 25px;">
+                <div class="results-header-admin">
+                    <div class="results-title-admin" id="bookingResultsTitle">✈️ 搜索结果</div>
+                    <div class="results-count-admin" id="bookingResultsCount"></div>
+                </div>
+                <div class="flights-container-admin" id="bookingFlightsContainer"></div>
+            </div>
+        </div>
+
+        <div class="content-panel" id="flightsPanel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                <h3>航班列表</h3>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="text" id="flightSearchNumber" placeholder="航班号" style="padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; width: 120px;">
+                    <input type="text" id="flightSearchDeparture" placeholder="出发地" style="padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; width: 120px;">
+                    <input type="text" id="flightSearchDestination" placeholder="目的地" style="padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; width: 120px;">
+                    <button class="search-btn" onclick="loadFlights()" style="padding: 6px 16px; background: #667eea; color: #fff; border: none; border-radius: 4px; cursor: pointer;">搜索</button>
+                </div>
+                <button class="action-btn edit" onclick="showAddFlightModal()">添加航班</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>航班号</th>
+                        <th>出发地</th>
+                        <th>目的地</th>
+                        <th>出发时间</th>
+                        <th>价格</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="flightsTableBody">
+                    <!-- 航班数据将在这里动态生成 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="content-panel" id="ordersPanel" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                <h3>订单列表</h3>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div class="search-group">
+                        <input type="text" id="orderSearchInput" placeholder="搜索航班号、订单号、乘客姓名" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 250px;">
+                        <button class="search-btn" onclick="loadOrders()" style="padding: 8px 16px; background: #667eea; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-left: 5px;">搜索</button>
+                    </div>
+                    <div class="filter-group">
+                        <label for="orderStatusFilter">状态筛选:</label>
+                        <select id="orderStatusFilter" onchange="loadOrders()">
+                            <option value="all">全部</option>
+                            <option value="1">待支付</option>
+                            <option value="2">已支付</option>
+                            <option value="3">已完成</option>
+                            <option value="4">已取消</option>
+                            <option value="5">已过期</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>订单号</th>
+                        <th>航班号</th>
+                        <th>乘客</th>
+                        <th>总价</th>
+                        <th>状态</th>
+                        <th>创建时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersTableBody">
+                    <!-- 订单数据将在这里动态生成 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="content-panel" id="usersPanel" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>用户列表</h3>
+                <div class="search-group">
+                    <input type="text" id="userSearchInput" placeholder="搜索用户名、邮箱、手机号" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 250px;">
+                    <button class="search-btn" onclick="loadUsers()" style="padding: 8px 16px; background: #667eea; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-left: 5px;">搜索</button>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>用户名</th>
+                        <th>邮箱</th>
+                        <th>手机号</th>
+                        <th>状态</th>
+                        <th>创建时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <!-- 用户数据将在这里动态生成 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="content-panel" id="adminsPanel" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>管理员列表</h3>
+                <button class="action-btn edit" onclick="showAddAdminModal()">添加管理员</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>用户名</th>
+                        <th>邮箱</th>
+                        <th>真实姓名</th>
+                        <th>角色</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="adminsTableBody">
+                    <!-- 管理员数据将在这里动态生成 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 编辑管理员弹窗 -->
+    <div class="modal-overlay" id="editAdminModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑管理员</h3>
+                <button class="close-btn" onclick="closeEditAdminModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editAdminId">
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="editAdminUsername" readonly>
+                </div>
+                <div class="form-group">
+                    <label>邮箱</label>
+                    <input type="email" id="editAdminEmail">
+                </div>
+                <div class="form-group">
+                    <label>真实姓名</label>
+                    <input type="text" id="editAdminRealName">
+                </div>
+                <div class="form-group">
+                    <label>手机号</label>
+                    <input type="text" id="editAdminPhone">
+                </div>
+                <div class="form-group">
+                    <label>角色</label>
+                    <select id="editAdminRole">
+                        <option value="ADMIN">管理员</option>
+                        <option value="OPERATOR">操作员</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>状态</label>
+                    <select id="editAdminStatus">
+                        <option value="1">正常</option>
+                        <option value="0">禁用</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>新密码（不填则不修改）</label>
+                    <input type="password" id="editAdminPassword" placeholder="请输入新密码">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeEditAdminModal()">取消</button>
+                <button class="btn-confirm" onclick="saveAdmin()">保存修改</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加管理员弹窗 -->
+    <div class="modal-overlay" id="addAdminModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加管理员</h3>
+                <button class="close-btn" onclick="closeAddAdminModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="addAdminUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>邮箱</label>
+                    <input type="email" id="addAdminEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>真实姓名</label>
+                    <input type="text" id="addAdminRealName">
+                </div>
+                <div class="form-group">
+                    <label>手机号</label>
+                    <input type="text" id="addAdminPhone">
+                </div>
+                <div class="form-group">
+                    <label>角色</label>
+                    <select id="addAdminRole">
+                        <option value="ADMIN">管理员</option>
+                        <option value="OPERATOR">操作员</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="addAdminPassword" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeAddAdminModal()">取消</button>
+                <button class="btn-confirm" onclick="addAdmin()">添加</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑用户选择弹窗 -->
+    <div class="modal-overlay" id="editUserChoiceModal">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3>选择编辑类型</h3>
+                <button class="close-btn" onclick="closeEditUserChoiceModal()">×</button>
+            </div>
+            <div class="modal-body" style="padding: 25px;">
+                <input type="hidden" id="editUserChoiceId">
+                <input type="hidden" id="editUserChoiceUsername">
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button class="btn-confirm" onclick="editUserInfo()" style="padding: 14px 20px; font-size: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 10px; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">
+                        <i class="fas fa-user-edit" style="margin-right: 8px;"></i>编辑用户信息
+                    </button>
+                    <button class="btn-confirm" onclick="editUserPassengers()" style="padding: 14px 20px; font-size: 15px; background: linear-gradient(135deg, #4caf50 0%, #45a049 100%); border: none; border-radius: 10px; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);">
+                        <i class="fas fa-users" style="margin-right: 8px;"></i>编辑乘客信息
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑用户弹窗 -->
+    <div class="modal-overlay" id="editUserModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑用户</h3>
+                <button class="close-btn" onclick="closeEditUserModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editUserId">
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="editUsername" readonly>
+                </div>
+                <div class="form-group">
+                    <label>邮箱</label>
+                    <input type="email" id="editEmail">
+                </div>
+                <div class="form-group">
+                    <label>手机号</label>
+                    <input type="text" id="editPhone">
+                </div>
+                <div class="form-group">
+                    <label>真实姓名</label>
+                    <input type="text" id="editRealName">
+                </div>
+                <div class="form-group">
+                    <label>用户状态</label>
+                    <select id="editUserStatus">
+                        <option value="1">正常</option>
+                        <option value="0">禁用</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeEditUserModal()">取消</button>
+                <button class="btn-confirm" onclick="saveUser()">保存修改</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑用户乘客信息弹窗 -->
+    <div class="modal-overlay" id="editUserPassengersModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>编辑乘客信息</h3>
+                <button class="close-btn" onclick="closeEditUserPassengersModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editPassengerUsername">
+                <div style="margin-bottom: 15px;">
+                    <strong>用户：</strong><span id="editPassengerUsernameDisplay"></span>
+                </div>
+                <div id="editPassengersList" style="max-height: 400px; overflow-y: auto;">
+                    <!-- 乘客列表 -->
+                </div>
+                <button class="btn-confirm" onclick="showAddPassengerForm()" style="width: 100%; margin-top: 15px; background: linear-gradient(135deg, #4caf50 0%, #45a049 100%); border: none; border-radius: 10px; padding: 12px 20px; font-size: 15px; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);">
+                    <i class="fas fa-plus" style="margin-right: 8px;"></i>添加乘客
+                </button>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeEditUserPassengersModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加乘客弹窗 -->
+    <div class="modal-overlay" id="addPassengerModal">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3>添加乘客</h3>
+                <button class="close-btn" onclick="closeAddPassengerModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="addPassengerUsername">
+                <div class="form-group">
+                    <label>姓名</label>
+                    <input type="text" id="addPassengerName" placeholder="请输入姓名">
+                </div>
+                <div class="form-group">
+                    <label>身份证号</label>
+                    <input type="text" id="addPassengerId" placeholder="请输入身份证号">
+                </div>
+                <div class="form-group">
+                    <label>手机号</label>
+                    <input type="text" id="addPassengerPhone" placeholder="请输入手机号">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeAddPassengerModal()">取消</button>
+                <button class="btn-confirm" onclick="addPassengerForUser()">添加乘客</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑单个乘客信息弹窗 -->
+    <div class="modal-overlay" id="editSinglePassengerModal">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3>修改乘客信息</h3>
+                <button class="close-btn" onclick="closeEditSinglePassengerModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editSinglePassengerUsername">
+                <input type="hidden" id="editSinglePassengerIndex">
+                <div class="form-group">
+                    <label>姓名</label>
+                    <input type="text" id="editSinglePassengerName" placeholder="请输入姓名">
+                </div>
+                <div class="form-group">
+                    <label>身份证号</label>
+                    <input type="text" id="editSinglePassengerId" placeholder="请输入身份证号">
+                </div>
+                <div class="form-group">
+                    <label>手机号</label>
+                    <input type="text" id="editSinglePassengerPhone" placeholder="请输入手机号">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeEditSinglePassengerModal()">取消</button>
+                <button class="btn-confirm" onclick="saveSinglePassengerEdit()">保存修改</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑订单弹窗 -->
+    <div class="modal-overlay" id="editOrderModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑订单</h3>
+                <button class="close-btn" onclick="closeEditOrderModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editOrderId">
+                <div class="form-group">
+                    <label>订单号</label>
+                    <input type="text" id="editOrderNo" readonly>
+                </div>
+                <div class="form-group">
+                    <label>航班号</label>
+                    <input type="text" id="editFlightNumber">
+                </div>
+                <div class="form-group">
+                    <label>乘客姓名</label>
+                    <input type="text" id="editPassengerName">
+                </div>
+                <div class="form-group">
+                    <label>乘客身份证号</label>
+                    <input type="text" id="editPassengerId">
+                </div>
+                <div class="form-group">
+                    <label>乘客手机号</label>
+                    <input type="text" id="editPassengerPhone">
+                </div>
+                <div class="form-group">
+                    <label>订单状态</label>
+                    <select id="editOrderStatus">
+                        <option value="1">待支付</option>
+                        <option value="2">已支付</option>
+                        <option value="3">已完成</option>
+                        <option value="4">已取消</option>
+                        <option value="5">已过期</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>支付方式</label>
+                    <input type="text" id="editPaymentMethod" placeholder="如: 微信支付">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeEditOrderModal()">取消</button>
+                <button class="btn-confirm" onclick="saveOrder()">保存修改</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认弹窗 -->
+    <div class="modal-overlay" id="deleteOrderModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>确认删除</h3>
+                <button class="close-btn" onclick="closeDeleteOrderModal()">×</button>
+            </div>
+            <div class="modal-body" style="padding: 25px; text-align: center;">
+                <div style="color: #333; font-size: 16px; margin-bottom: 10px;">确定要删除此订单吗？</div>
+                <div style="color: #666; font-size: 14px;">删除后无法恢复，请谨慎操作。</div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeDeleteOrderModal()">取消</button>
+                <button class="btn-confirm btn-delete" onclick="confirmDeleteOrder()">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 订单详情弹窗 -->
+    <div class="modal-overlay" id="viewOrderModal">
+        <div class="modal-content" style="max-width: 550px;">
+            <div class="modal-header">
+                <h3>订单详情</h3>
+                <button class="close-btn" onclick="closeViewOrderModal()">×</button>
+            </div>
+            <div class="modal-body" id="viewOrderBody" style="padding: 25px;">
+                <!-- 订单详情内容 -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeViewOrderModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 改签弹窗 -->
+    <div class="modal-overlay" id="changeFlightModal">
+        <div class="modal-content" style="max-width: 700px; max-height: 85vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3>机票改签</h3>
+                <button class="close-btn" onclick="closeChangeFlightModal()">×</button>
+            </div>
+            <div class="modal-body" id="changeFlightBody" style="padding: 25px;">
+                <!-- 改签内容将在这里动态生成 -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeChangeFlightModal()">取消</button>
+                <button class="btn-confirm" id="confirmChangeBtn" onclick="confirmChangeFlightAdmin()" disabled>确认改签</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 管理员预订确认弹窗 -->
+    <div class="modal-overlay" id="adminBookingModal" style="display: none;">
+        <div class="modal-content" style="max-width: 550px;">
+            <div class="modal-header">
+                <h3>✈️ 确认预订</h3>
+                <button class="close-btn" onclick="closeAdminBookingModal()">×</button>
+            </div>
+            <div class="modal-body" id="adminBookingModalBody">
+                <!-- 动态内容 -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeAdminBookingModal()">取消</button>
+                <button class="btn-confirm" onclick="submitAdminBooking()">确认预订</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加航班弹窗 -->
+    <div class="modal-overlay" id="addFlightModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加航班</h3>
+                <button class="close-btn" onclick="closeAddFlightModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>航班号</label>
+                    <input type="text" id="flightNumber" placeholder="如: CA1234">
+                </div>
+                <div class="form-group">
+                    <label>出发城市</label>
+                    <div class="city-select-wrapper">
+                        <input type="text" id="departureCity" placeholder="输入或选择出发城市" oninput="filterCities('departure')" onfocus="showCityDropdown('departure')">
+                        <div class="city-dropdown" id="departureCityDropdown"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>出发机场代码</label>
+                    <div class="city-select-wrapper">
+                        <input type="text" id="departureCode" placeholder="输入或选择出发机场" oninput="filterAirports('departure')" onfocus="showAirportDropdown('departure')">
+                        <div class="city-dropdown" id="departureCodeDropdown"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>目的城市</label>
+                    <div class="city-select-wrapper">
+                        <input type="text" id="destinationCity" placeholder="输入或选择目的城市" oninput="filterCities('destination')" onfocus="showCityDropdown('destination')">
+                        <div class="city-dropdown" id="destinationCityDropdown"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>目的机场代码</label>
+                    <div class="city-select-wrapper">
+                        <input type="text" id="destinationCode" placeholder="输入或选择目的机场" oninput="filterAirports('destination')" onfocus="showAirportDropdown('destination')">
+                        <div class="city-dropdown" id="destinationCodeDropdown"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>航班周期</label>
+                    <div style="display: flex; gap: 20px; margin-bottom: 10px;">
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                            <input type="radio" name="flightSchedule" value="specific" checked onchange="toggleFlightSchedule()">
+                            <span>具体日期</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                            <input type="radio" name="flightSchedule" value="daily" onchange="toggleFlightSchedule()">
+                            <span>每天都有</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group" id="specificDateGroup">
+                    <label>出发日期时间</label>
+                    <input type="datetime-local" id="departureTime">
+                </div>
+                <div class="form-group" id="specificArrivalGroup">
+                    <label>到达日期时间</label>
+                    <input type="datetime-local" id="arrivalTime">
+                </div>
+                <div class="form-group" id="dailyTimeGroup" style="display: none;">
+                    <label>出发时间（每天）</label>
+                    <input type="time" id="departureTimeDaily">
+                </div>
+                <div class="form-group" id="dailyArrivalGroup" style="display: none;">
+                    <label>到达时间（每天）</label>
+                    <input type="time" id="arrivalTimeDaily">
+                </div>
+                <div class="form-group">
+                    <label>价格</label>
+                    <input type="number" id="price" placeholder="如: 399">
+                </div>
+                <div class="form-group">
+                    <label>舱位类型</label>
+                    <select id="cabinType">
+                        <option value="economy">经济舱</option>
+                        <option value="business">商务舱</option>
+                        <option value="first">头等舱</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>总座位数</label>
+                    <input type="number" id="totalSeats" placeholder="如: 180">
+                </div>
+                <div class="form-group">
+                    <label>航空公司</label>
+                    <input type="text" id="airline" placeholder="如: 中国国航">
+                </div>
+                <div class="form-group">
+                    <label>航班类型</label>
+                    <select id="flightType">
+                        <option value="domestic">国内航班</option>
+                        <option value="international">国际航班</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeAddFlightModal()">取消</button>
+                <button class="btn-confirm" onclick="addFlight()">确认添加</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑航班弹窗 -->
+    <div class="modal-overlay" id="editFlightModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑航班</h3>
+                <button class="close-btn" onclick="closeEditFlightModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editFlightId">
+                <div class="form-group">
+                    <label>航班号</label>
+                    <input type="text" id="editFlightNumber" placeholder="如: CA1234">
+                </div>
+                <div class="form-group">
+                    <label>出发城市</label>
+                    <div class="city-select-wrapper">
+                        <input type="text" id="editDepartureCity" placeholder="输入或选择出发城市" oninput="filterEditCities('departure')" onfocus="showEditCityDropdown('departure')">
+                        <div class="city-dropdown" id="editDepartureCityDropdown"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>出发机场代码</label>
+                    <div class="city-select-wrapper">
+                        <input type="text" id="editDepartureCode" placeholder="输入或选择出发机场" oninput="filterEditAirports('departure')" onfocus="showEditAirportDropdown('departure')">
+                        <div class="city-dropdown" id="editDepartureCodeDropdown"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>目的城市</label>
+                    <div class="city-select-wrapper">
+                        <input type="text" id="editDestinationCity" placeholder="输入或选择目的城市" oninput="filterEditCities('destination')" onfocus="showEditCityDropdown('destination')">
+                        <div class="city-dropdown" id="editDestinationCityDropdown"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>目的机场代码</label>
+                    <div class="city-select-wrapper">
+                        <input type="text" id="editDestinationCode" placeholder="输入或选择目的机场" oninput="filterEditAirports('destination')" onfocus="showEditAirportDropdown('destination')">
+                        <div class="city-dropdown" id="editDestinationCodeDropdown"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>出发时间</label>
+                    <input type="datetime-local" id="editDepartureTime">
+                </div>
+                <div class="form-group">
+                    <label>到达时间</label>
+                    <input type="datetime-local" id="editArrivalTime">
+                </div>
+                <div class="form-group">
+                    <label>价格</label>
+                    <input type="number" id="editPrice" placeholder="如: 399">
+                </div>
+                <div class="form-group">
+                    <label>舱位类型</label>
+                    <select id="editCabinType">
+                        <option value="economy">经济舱</option>
+                        <option value="business">商务舱</option>
+                        <option value="first">头等舱</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>总座位数</label>
+                    <input type="number" id="editTotalSeats" placeholder="如: 180">
+                </div>
+                <div class="form-group">
+                    <label>可用座位数</label>
+                    <input type="number" id="editAvailableSeats" placeholder="如: 150">
+                </div>
+                <div class="form-group">
+                    <label>航空公司</label>
+                    <input type="text" id="editAirline" placeholder="如: 中国国航">
+                </div>
+                <div class="form-group">
+                    <label>航班类型</label>
+                    <select id="editFlightType">
+                        <option value="domestic">国内航班</option>
+                        <option value="international">国际航班</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>状态</label>
+                    <select id="editFlightStatus">
+                        <option value="1">可用</option>
+                        <option value="0">不可用</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeEditFlightModal()">取消</button>
+                <button class="btn-confirm" onclick="saveEditFlight()">保存修改</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function getUrlParam(name) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(name);
+        }
+        
+        const username = getUrlParam('username') || '管理员';
+        document.getElementById('username').textContent = username;
+        
+        function logout() {
+            if (confirm('确定退出？')) {
+                fetch('http://localhost:8080/flight-booking/api/admin/logout', {
+                    method: 'POST'
+                }).then(() => {
+                    window.location.href = '管理员登录页.html';
+                });
+            }
+        }
+        
+        function showTab(tabName) {
+            // 保存当前标签页到 localStorage
+            localStorage.setItem('adminActiveTab', tabName);
+            
+            document.querySelectorAll('.nav-tabs button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.querySelectorAll('.content-panel').forEach(panel => panel.style.display = 'none');
+            document.getElementById(tabName + 'Panel').style.display = 'block';
+            
+            if (tabName === 'flights') loadFlights();
+            if (tabName === 'booking') loadBookingFlights();
+            if (tabName === 'orders') loadOrders();
+            if (tabName === 'users') loadUsers();
+            if (tabName === 'admins') loadAdmins();
+            
+            // 标签页切换后恢复滚动位置（防止点击按钮导致滚动）
+            requestAnimationFrame(function() {
+                restoreScrollPosition();
+            });
+        }
+        
+        // ======== 管理员预订功能 ========
+        
+        // 全局用户列表，供预订弹窗使用
+        window.adminUserList = [];
+        
+        // 切换购买者输入模式
+        function toggleBuyerInput() {
+            const select = document.getElementById('adminBuyerUsername');
+            const input = document.getElementById('adminBuyerUsernameCustom');
+            const btn = event.target;
+            
+            if (input.style.display === 'none') {
+                input.style.display = 'block';
+                select.style.display = 'none';
+                btn.textContent = '📋 从列表选择用户';
+            } else {
+                input.style.display = 'none';
+                select.style.display = 'block';
+                btn.textContent = '✏️ 手动输入用户名';
+            }
+            
+            // 切换后更新乘客列表
+            updatePassengerList();
+        }
+        
+        // 根据购买者用户名更新乘客列表
+        function updatePassengerList() {
+            // 获取当前购买者用户名
+            const select = document.getElementById('adminBuyerUsername');
+            const input = document.getElementById('adminBuyerUsernameCustom');
+            const username = (input.style.display === 'block' && input.value.trim()) ? 
+                input.value.trim() : select.value;
+            
+            const passengerSelect = document.getElementById('adminPassengerSelect');
+            
+            if (!username) {
+                passengerSelect.innerHTML = '<option value="">请先选择购买者</option>';
+                return;
+            }
+            
+            // 从localStorage获取该用户的乘客列表
+            const passengersKey = `${username}_passengers`;
+            const savedPassengers = localStorage.getItem(passengersKey);
+            const passengers = savedPassengers ? JSON.parse(savedPassengers) : [];
+            
+            if (passengers.length === 0) {
+                passengerSelect.innerHTML = '<option value="">该用户暂无乘客</option>';
+            } else {
+                passengerSelect.innerHTML = `
+                    <option value="">请选择乘客</option>
+                    ${passengers.map((p, i) => `<option value="${i}">${p.name} (${p.id.slice(-4)})</option>`).join('')}
+                `;
+            }
+        }
+        
+        // 加载用户列表
+        async function loadUserList() {
+            try {
+                const res = await fetch('http://localhost:8080/flight-booking/api/users', { method: 'GET' });
+                const result = await res.json();
+                
+                if (result.success) {
+                    // 存储到全局变量
+                    window.adminUserList = result.data.map(user => user.username);
+                    
+                    // 更新搜索区域的用户列表
+                    const userList = document.getElementById('userList');
+                    if (userList) {
+                        userList.innerHTML = '';
+                        window.adminUserList.forEach(username => {
+                            const option = document.createElement('option');
+                            option.value = username;
+                            userList.appendChild(option);
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('加载用户列表失败:', error);
+            }
+        }
+        
+        // 页面加载时自动加载用户列表
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserList();
+        });
+        
+        // 切换出发城市和到达城市
+        function switchBookingCities() {
+            const d = document.getElementById('bookingDeparture');
+            const dest = document.getElementById('bookingDestination');
+            [d.value, dest.value] = [dest.value, d.value];
+        }
+        
+        // 搜索航班
+        async function searchBookingFlights() {
+            const dep = document.getElementById('bookingDeparture').value;
+            const dest = document.getElementById('bookingDestination').value;
+            const date = document.getElementById('bookingDepartDate').value;
+            const sortBy = document.getElementById('bookingSortBy').value;
+
+            // 当搜索条件不完整时不执行搜索（不显示结果区域）
+            if (!dep || !dest || !date) {
+                document.getElementById('bookingResultsSection').style.display = 'none';
+                return;
+            }
+
+            const btn = document.getElementById('searchBtnAdmin');
+            const txt = btn.textContent;
+            btn.textContent = '搜索中...';
+            btn.disabled = true;
+            document.getElementById('bookingResultsSection').style.display = 'none';
+
+            try {
+                const url = `http://localhost:8080/flight-booking/api/flights/search?departure=${encodeURIComponent(dep)}&destination=${encodeURIComponent(dest)}&date=${encodeURIComponent(date)}&sortBy=${encodeURIComponent(sortBy)}`;
+                const res = await fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } });
+                const result = await res.json();
+
+                if (result.success) {
+                    // 保存搜索条件到 localStorage
+                    localStorage.setItem('adminBookingSearch', JSON.stringify({
+                        departure: dep,
+                        destination: dest,
+                        date: date,
+                        sortBy: sortBy
+                    }));
+                    
+                    if (result.data.length > 0) {
+                        displayBookingResults(result.data, dep, dest, date);
+                    } else {
+                        displayBookingNoResults();
+                    }
+                } else {
+                    alert('查询失败: ' + result.message);
+                }
+            } catch (e) {
+                console.error('查询失败:', e);
+                alert('查询失败，请检查后端服务');
+            } finally {
+                btn.textContent = txt;
+                btn.disabled = false;
+            }
+        }
+        
+        // 恢复机票预订搜索状态
+        function restoreBookingSearchState() {
+            const savedSearch = localStorage.getItem('adminBookingSearch');
+            if (savedSearch) {
+                try {
+                    const searchParams = JSON.parse(savedSearch);
+                    document.getElementById('bookingDeparture').value = searchParams.departure || '';
+                    document.getElementById('bookingDestination').value = searchParams.destination || '';
+                    document.getElementById('bookingDepartDate').value = searchParams.date || '';
+                    document.getElementById('bookingSortBy').value = searchParams.sortBy || 'departureTime';
+                    
+                    // 如果所有条件都完整，自动执行搜索
+                    if (searchParams.departure && searchParams.destination && searchParams.date) {
+                        searchBookingFlights();
+                    }
+                } catch (e) {
+                    console.error('解析保存的搜索条件失败:', e);
+                }
+            }
+        }
+        
+        // 显示搜索结果
+        function displayBookingResults(flights, dep, dest, date) {
+            const sec = document.getElementById('bookingResultsSection');
+            const cont = document.getElementById('bookingFlightsContainer');
+            document.getElementById('bookingResultsTitle').innerHTML = `✈️ ${dep} → ${dest}`;
+            document.getElementById('bookingResultsCount').textContent = `${date} · 共 ${flights.length} 个航班`;
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const searchDate = new Date(date);
+            const isExpired = searchDate < today;
+            
+            cont.innerHTML = flights.map(f => `
+                <div class="flight-card-admin">
+                    <div class="flight-info-admin">
+                        <div class="city-info-admin">
+                            <div class="city-date-admin">${date}</div>
+                            <div class="city-time-admin">${formatTimeAdmin(f.departureTime)}</div>
+                            <div class="city-name-admin">${f.departureCity}</div>
+                            <div class="city-code-admin">${f.departureCode}</div>
+                        </div>
+                        <div class="route-container-admin">
+                            <div class="duration-admin">${f.duration}</div>
+                            <span class="route-arrow-admin">→</span>
+                        </div>
+                        <div class="city-info-admin">
+                            <div class="city-time-admin">${formatTimeAdmin(f.arrivalTime)}</div>
+                            <div class="city-name-admin">${f.destinationCity}</div>
+                            <div class="city-code-admin">${f.destinationCode}</div>
+                        </div>
+                        <div class="flight-details-admin">
+                            <div class="flight-number-admin">${f.flightNumber}</div>
+                            <div class="airline-admin">${f.airline}</div>
+                            <div class="cabin-type-admin">${getCabinAdmin(f.cabinType)}</div>
+                        </div>
+                    </div>
+                    <div class="price-info-admin">
+                        <div class="price-admin">¥${f.price}</div>
+                        <div class="seats-info-admin">剩余 ${f.availableSeats}/${f.totalSeats} 座</div>
+                    </div>
+                    ${isExpired ? `
+                        <button class="book-btn-admin disabled" disabled>已过期</button>
+                    ` : `
+                        <button class="book-btn-admin" data-flight-admin='${JSON.stringify(f).replace(/'/g, "\\'")}'>立即预订</button>
+                    `}
+                </div>
+            `).join('');
+
+            sec.style.display = 'block';
+            // 数据加载完成后恢复滚动位置
+            scheduleRestoreScroll();
+        }
+        
+        // 显示无结果
+        function displayBookingNoResults() {
+            document.getElementById('bookingResultsTitle').innerHTML = '✈️ 未找到航班';
+            document.getElementById('bookingResultsCount').textContent = '';
+            document.getElementById('bookingFlightsContainer').innerHTML = `
+                <div class="no-results-admin">
+                    <div class="no-results-icon-admin">🔍</div>
+                    <div class="no-results-title-admin">未找到符合条件的航班</div>
+                    <div class="no-results-desc-admin">请尝试调整搜索条件，或选择其他日期</div>
+                </div>
+            `;
+            document.getElementById('bookingResultsSection').style.display = 'block';
+            // 数据加载完成后恢复滚动位置
+            scheduleRestoreScroll();
+        }
+        
+        // 格式化时间
+        function formatTimeAdmin(s) {
+            return new Date(s).toLocaleTimeString('zh-CN', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        // 获取舱位名称
+        function getCabinAdmin(t) {
+            return {
+                economy: '经济舱',
+                business: '商务舱',
+                first: '头等舱'
+            }[t] || t;
+        }
+        
+        // 预订航班
+        let adminSelectedFlight = null;
+        
+        function bookFlightAdmin(flight) {
+            adminSelectedFlight = flight;
+            updateAdminBookingModal();
+            document.getElementById('adminBookingModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // 更新预订模态框
+        function updateAdminBookingModal() {
+            if (!adminSelectedFlight) return;
+            
+            // 加载用户列表用于下拉选择
+            const userListHtml = window.adminUserList ? 
+                window.adminUserList.map(u => `<option value="${u}">${u}</option>`).join('') : '';
+            
+            document.getElementById('adminBookingModalBody').innerHTML = `
+                <div class="booking-flight-info">
+                    <h4>航班信息</h4>
+                    <div class="flight-summary">
+                        <div class="route">
+                            <span class="city">${adminSelectedFlight.departureCity}</span>
+                            <span class="city-code">(${adminSelectedFlight.departureCode})</span>
+                            <span class="arrow">→</span>
+                            <span class="city">${adminSelectedFlight.destinationCity}</span>
+                            <span class="city-code">(${adminSelectedFlight.destinationCode})</span>
+                        </div>
+                        <div class="time-info">
+                            <span>${formatTimeAdmin(adminSelectedFlight.departureTime)}</span>
+                            <span class="duration">历时 ${adminSelectedFlight.duration}</span>
+                            <span>${formatTimeAdmin(adminSelectedFlight.arrivalTime)}</span>
+                        </div>
+                        <div class="flight-detail">
+                            <span>${adminSelectedFlight.flightNumber}</span>
+                            <span>${adminSelectedFlight.airline}</span>
+                            <span>${getCabinAdmin(adminSelectedFlight.cabinType)}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="buyer-selector">
+                    <h4>选择购买者</h4>
+                    <div class="form-group">
+                        <label for="adminBuyerUsername">用户名</label>
+                        <select id="adminBuyerUsername" required onchange="updatePassengerList()">
+                            <option value="">请选择用户</option>
+                            ${userListHtml}
+                        </select>
+                        <input type="text" id="adminBuyerUsernameCustom" placeholder="请输入用户名" style="margin-top: 8px; display: none;" oninput="updatePassengerList()">
+                        <button type="button" class="toggle-input-btn" onclick="toggleBuyerInput()" style="margin-top: 8px; padding: 6px 12px; background: #f5f7fa; border: 1px solid #e0e0e0; border-radius: 6px; cursor: pointer; font-size: 12px; color: #667eea;">
+                            ✏️ 手动输入用户名
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="passenger-selector">
+                    <h4>选择乘客</h4>
+                    <div class="passenger-select-container">
+                        <select id="adminPassengerSelect" onchange="selectAdminPassenger()">
+                            <option value="">请先选择购买者</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="passenger-form">
+                    <h4>乘客信息</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="adminPassengerName">乘客姓名</label>
+                            <input type="text" id="adminPassengerName" placeholder="请输入乘客姓名" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="adminPassengerID">身份证号</label>
+                            <input type="text" id="adminPassengerID" placeholder="请输入身份证号码" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="adminPassengerPhone">联系电话</label>
+                            <input type="tel" id="adminPassengerPhone" placeholder="请输入联系电话" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="adminCabinType">舱位</label>
+                            <select id="adminCabinType" onchange="updateAdminCabinPrice()">
+                                <option value="economy">经济舱</option>
+                                <option value="business">商务舱</option>
+                                <option value="first">头等舱</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="order-summary">
+                    <h4>订单摘要</h4>
+                    <div class="summary-row"><span>票价</span><span id="adminCabinPrice">¥${adminSelectedFlight.price}</span></div>
+                    <div class="summary-row"><span>服务费</span><span>¥20</span></div>
+                    <div class="summary-row total"><span>应付总额</span><span id="adminTotalPrice">¥${adminSelectedFlight.price + 20}</span></div>
+                    <div style="margin-top: 15px; padding: 10px; background: #fff3e0; border-radius: 8px; font-size: 13px; color: #e65100;">
+                        ⚠️ 管理员预订将直接创建未支付订单，请确认信息无误
+                    </div>
+                </div>
+            `;
+            
+            updateAdminCabinPrice();
+        }
+        
+        // 更新舱位价格
+        function updateAdminCabinPrice() {
+            if (!adminSelectedFlight) return;
+            
+            const cabinType = document.getElementById('adminCabinType').value;
+            const cabinPrice = calculateAdminCabinPrice(
+                adminSelectedFlight.price,
+                cabinType,
+                adminSelectedFlight.duration,
+                adminSelectedFlight.departureCity,
+                adminSelectedFlight.destinationCity
+            );
+            
+            document.getElementById('adminCabinPrice').textContent = '¥' + cabinPrice;
+            document.getElementById('adminTotalPrice').textContent = '¥' + (cabinPrice + 20);
+        }
+        
+        // 计算舱位价格
+        function calculateAdminCabinPrice(basePrice, cabinType, duration, departureCity, destinationCity) {
+            const domesticCities = ['北京', '上海', '广州', '深圳', '成都', '杭州', '重庆', '西安', '武汉', '南京'];
+            const isInternational = !domesticCities.includes(departureCity) || !domesticCities.includes(destinationCity);
+            
+            const durationMatch = duration.match(/(\d+)小时(?:(\d+)分)?/);
+            const hours = durationMatch ? parseInt(durationMatch[1]) + (durationMatch[2] ? parseInt(durationMatch[2]) / 60 : 0) : 0;
+            
+            let multiplier = 1;
+            if (cabinType === 'business') {
+                if (isInternational) {
+                    multiplier = 4;
+                } else if (hours <= 3) {
+                    multiplier = 2;
+                } else {
+                    multiplier = 3;
+                }
+            } else if (cabinType === 'first') {
+                if (isInternational) {
+                    multiplier = 9;
+                } else if (hours <= 3) {
+                    multiplier = 4;
+                } else {
+                    multiplier = 6;
+                }
+            }
+            
+            return Math.round(basePrice * multiplier);
+        }
+        
+        // 选择乘客
+        function selectAdminPassenger() {
+            const select = document.getElementById('adminPassengerSelect');
+            const index = select.value;
+            
+            if (index !== '') {
+                const savedPassengers = localStorage.getItem('passengers');
+                const passengers = savedPassengers ? JSON.parse(savedPassengers) : [];
+                const passenger = passengers[index];
+                
+                if (passenger) {
+                    document.getElementById('adminPassengerName').value = passenger.name;
+                    document.getElementById('adminPassengerID').value = passenger.id;
+                    document.getElementById('adminPassengerPhone').value = passenger.phone;
+                }
+            } else {
+                document.getElementById('adminPassengerName').value = '';
+                document.getElementById('adminPassengerID').value = '';
+                document.getElementById('adminPassengerPhone').value = '';
+            }
+        }
+        
+        // 关闭预订模态框
+        function closeAdminBookingModal() {
+            document.getElementById('adminBookingModal').style.display = 'none';
+            document.body.style.overflow = '';
+            adminSelectedFlight = null;
+        }
+        
+        // 提交预订（管理员端，直接创建未支付订单）
+        async function submitAdminBooking() {
+            if (!adminSelectedFlight) {
+                alert('请先选择航班');
+                return;
+            }
+            
+            // 获取购买者用户名（支持下拉选择或手动输入）
+            const selectValue = document.getElementById('adminBuyerUsername').value;
+            const customValue = document.getElementById('adminBuyerUsernameCustom').value;
+            const buyerUsername = customValue.trim() ? customValue.trim() : selectValue;
+            const name = document.getElementById('adminPassengerName').value;
+            const id = document.getElementById('adminPassengerID').value;
+            const phone = document.getElementById('adminPassengerPhone').value;
+            const cabinType = document.getElementById('adminCabinType').value;
+            
+            if (!buyerUsername.trim()) {
+                alert('请输入购买者用户名');
+                return;
+            }
+            
+            if (!name.trim()) {
+                alert('请输入乘客姓名');
+                return;
+            }
+            
+            const idRegex = /^[1-9]\d{5}(18|19|20)?\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[\dXx]?$/;
+            if (!id.trim() || !idRegex.test(id)) {
+                alert('请输入有效的身份证号码');
+                return;
+            }
+            
+            if (!phone.trim() || !/^1[3-9]\d{9}$/.test(phone)) {
+                alert('请输入有效的手机号码');
+                return;
+            }
+            
+            const btn = document.querySelector('#adminBookingModal .btn-confirm');
+            btn.textContent = '提交中...';
+            btn.disabled = true;
+            
+            try {
+                const cabinPrice = calculateAdminCabinPrice(
+                    adminSelectedFlight.price,
+                    cabinType,
+                    adminSelectedFlight.duration,
+                    adminSelectedFlight.departureCity,
+                    adminSelectedFlight.destinationCity
+                );
+                
+                const seatNumber = generateAdminSeatNumber(cabinType);
+                
+                const bookingData = {
+                    userId: 0, // 管理员预订，用户ID设为0或特殊标识
+                    buyerUsername: buyerUsername,
+                    flightId: adminSelectedFlight.id,
+                    flightNumber: adminSelectedFlight.flightNumber,
+                    departureCity: adminSelectedFlight.departureCity,
+                    departureCode: adminSelectedFlight.departureCode,
+                    destinationCity: adminSelectedFlight.destinationCity,
+                    destinationCode: adminSelectedFlight.destinationCode,
+                    departureDate: document.getElementById('bookingDepartDate').value || adminSelectedFlight.departureDate,
+                    departureTime: adminSelectedFlight.departureTime,
+                    arrivalTime: adminSelectedFlight.arrivalTime,
+                    passengerName: name,
+                    passengerId: id,
+                    passengerPhone: phone,
+                    cabinType: cabinType,
+                    seatNumber: seatNumber,
+                    price: cabinPrice,
+                    serviceFee: 20,
+                    totalPrice: cabinPrice + 20,
+                    duration: adminSelectedFlight.duration,
+                    status: 1 // 1-待支付（未支付）
+                };
+                
+                // 创建订单，后端会同时插入到 orders 和 admin_orders 两个表
+                const res = await fetch('http://localhost:8080/flight-booking/api/orders/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(bookingData)
+                });
+                
+                const result = await res.json();
+                
+                if (result.success) {
+                    const orderId = result.data.orderNo;
+                    closeAdminBookingModal();
+                    alert(`预订成功！\n订单号：${orderId}\n订单状态：待支付`);
+                    // 刷新订单列表
+                    const activeTab = document.querySelector('.nav-tabs button.active');
+                    if (activeTab.textContent === '订单管理') {
+                        loadOrders();
+                    }
+                } else {
+                    alert('预订失败: ' + result.message);
+                }
+            } catch (e) {
+                console.error('预订失败:', e);
+                alert('预订失败，请检查网络连接');
+            } finally {
+                btn.textContent = '确认预订';
+                btn.disabled = false;
+            }
+        }
+        
+        // 生成座位号
+        function generateAdminSeatNumber(cabinType) {
+            const rows = {
+                economy: { min: 31, max: 60 },
+                business: { min: 11, max: 30 },
+                first: { min: 1, max: 10 }
+            };
+            
+            const seatLayouts = {
+                economy: ['A', 'F', 'C', 'D', 'B', 'E'],
+                business: ['A', 'F', 'C', 'D', 'B', 'E'],
+                first: ['A', 'F', 'B', 'E']
+            };
+            
+            const range = rows[cabinType] || rows.economy;
+            const layout = seatLayouts[cabinType] || seatLayouts.economy;
+            
+            const allocatedSeats = JSON.parse(localStorage.getItem('allocatedSeats') || '{}');
+            const flightKey = adminSelectedFlight ? adminSelectedFlight.flightNumber + '_' + adminSelectedFlight.departureDate : 'default';
+            const usedSeats = allocatedSeats[flightKey] || [];
+            
+            for (let row = range.max; row >= range.min; row--) {
+                for (const letter of layout) {
+                    const seatNumber = letter + row;
+                    if (!usedSeats.includes(seatNumber)) {
+                        usedSeats.push(seatNumber);
+                        allocatedSeats[flightKey] = usedSeats;
+                        localStorage.setItem('allocatedSeats', JSON.stringify(allocatedSeats));
+                        return seatNumber;
+                    }
+                }
+            }
+            
+            return layout[0] + range.min;
+        }
+        
+        // 加载预订面板的航班数据（空实现，因为需要搜索）
+        function loadBookingFlights() {
+            // 清空结果区域
+            document.getElementById('bookingResultsSection').style.display = 'none';
+        }
+        
+        // 表单提交事件
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('searchFormAdmin');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    searchBookingFlights();
+                });
+            }
+            
+            // 自动搜索：当任何搜索条件改变时自动触发搜索
+            const bookingDeparture = document.getElementById('bookingDeparture');
+            const bookingDestination = document.getElementById('bookingDestination');
+            const bookingDepartDate = document.getElementById('bookingDepartDate');
+            const bookingSortBy = document.getElementById('bookingSortBy');
+            
+            if (bookingDeparture) bookingDeparture.addEventListener('change', searchBookingFlights);
+            if (bookingDestination) bookingDestination.addEventListener('change', searchBookingFlights);
+            if (bookingDepartDate) bookingDepartDate.addEventListener('change', searchBookingFlights);
+            if (bookingSortBy) bookingSortBy.addEventListener('change', searchBookingFlights);
+            
+            // 事件委托处理预订按钮
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('book-btn-admin') && !e.target.classList.contains('disabled')) {
+                    const flightData = e.target.getAttribute('data-flight-admin');
+                    const flight = JSON.parse(flightData);
+                    bookFlightAdmin(flight);
+                }
+            });
+            
+            // 恢复机票预订搜索状态
+            restoreBookingSearchState();
+        });
+        
+        // ======== 管理员预订功能结束 ========
+
+        function loadStats() {
+            console.log('开始获取统计数据...');
+            fetch('http://localhost:8080/flight-booking/api/admin/stats')
+                .then(res => {
+                    console.log('HTTP状态码:', res.status);
+                    console.log('响应头:', res.headers);
+                    return res.json();
+                })
+                .then(result => {
+                    console.log('API返回结果:', result);
+                    if (result.success) {
+                        const data = result.data;
+                        console.log('统计数据:', data);
+                        document.getElementById('totalFlights').textContent = data.totalFlights || '0';
+                        document.getElementById('totalOrders').textContent = data.totalOrders || '0';
+                        document.getElementById('totalUsers').textContent = data.totalUsers || '0';
+                    } else {
+                        console.log('API返回失败:', result.message);
+                        // 如果获取失败，使用默认值
+                        document.getElementById('totalFlights').textContent = '0';
+                        document.getElementById('totalOrders').textContent = '0';
+                        document.getElementById('totalUsers').textContent = '0';
+                    }
+                })
+                .catch(error => {
+                    console.error('获取统计数据失败:', error);
+                    document.getElementById('totalFlights').textContent = '0';
+                    document.getElementById('totalOrders').textContent = '0';
+                    document.getElementById('totalUsers').textContent = '0';
+                });
+        }
+        
+        // 存储当前加载的航班数据
+        let currentFlightsData = [];
+        
+        function loadFlights() {
+            const flightNumber = document.getElementById('flightSearchNumber').value.trim();
+            const departure = document.getElementById('flightSearchDeparture').value.trim();
+            const destination = document.getElementById('flightSearchDestination').value.trim();
+            
+            let url = 'http://localhost:8080/flight-booking/api/flights';
+            const params = [];
+            if (flightNumber) {
+                params.push('flightNumber=' + encodeURIComponent(flightNumber));
+            }
+            if (departure) {
+                params.push('departure=' + encodeURIComponent(departure));
+            }
+            if (destination) {
+                params.push('destination=' + encodeURIComponent(destination));
+            }
+            if (params.length > 0) {
+                url += '?' + params.join('&');
+            }
+            
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            })
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success) {
+                        currentFlightsData = result.data;
+                        const tbody = document.getElementById('flightsTableBody');
+                        tbody.innerHTML = result.data.map(flight => `
+                            <tr>
+                                <td>${flight.flightNumber}</td>
+                                <td>${flight.departureCity} (${flight.departureCode})</td>
+                                <td>${flight.destinationCity} (${flight.destinationCode})</td>
+                                <td>${flight.departureTime}</td>
+                                <td>¥${flight.price}</td>
+                                <td>${flight.status === 1 ? '可用' : '不可用'}</td>
+                                <td>
+                                    <button class="action-btn edit" onclick="editFlight(${flight.id})">编辑</button>
+                                    <button class="action-btn delete" onclick="deleteFlight(${flight.id})">删除</button>
+                                </td>
+                            </tr>
+                        `).join('');
+                    }
+                    // 数据加载完成后恢复滚动位置
+                    scheduleRestoreScroll();
+                });
+        }
+        
+        function loadOrders() {
+            const statusFilter = document.getElementById('orderStatusFilter').value;
+            const searchKeyword = document.getElementById('orderSearchInput').value.trim();
+            let url = 'http://localhost:8080/flight-booking/api/admin/orders/all';
+            const params = [];
+            if (statusFilter !== 'all') {
+                params.push('status=' + statusFilter);
+            }
+            if (searchKeyword) {
+                params.push('keyword=' + encodeURIComponent(searchKeyword));
+            }
+            if (params.length > 0) {
+                url += '?' + params.join('&');
+            }
+            fetch(url)
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success) {
+                        const tbody = document.getElementById('ordersTableBody');
+                        const statusMap = {1: '待支付', 2: '已支付', 3: '已完成', 4: '已取消', 5: '已过期'};
+                        tbody.innerHTML = result.data.map(order => `
+                            <tr>
+                                <td>${order.orderNo}</td>
+                                <td>${order.flightNumber}</td>
+                                <td>${order.passengerName}</td>
+                                <td>¥${order.totalPrice}</td>
+                                <td>${statusMap[order.status] || '未知'}</td>
+                                <td>${order.createdAt}</td>
+                                <td>
+                                    <button class="action-btn view" onclick="viewOrder(${order.id})">查看</button>
+                                    <button class="action-btn edit" onclick="editOrder(${order.id})">编辑</button>
+                                    ${order.status === 2 ? '<button class="action-btn change" onclick="changeFlightAdmin(' + order.id + ')">改签</button>' : ''}
+                                    ${[3, 4, 5].includes(order.status) ? '<button class="action-btn delete" onclick="deleteOrderAdmin(\'' + order.orderNo + '\')">删除</button>' : ''}
+                                </td>
+                            </tr>
+                        `).join('');
+                    }
+                    // 数据加载完成后恢复滚动位置
+                    scheduleRestoreScroll();
+                });
+        }
+        
+        function loadUsers() {
+            const searchKeyword = document.getElementById('userSearchInput').value.trim();
+            let url = 'http://localhost:8080/flight-booking/api/users';
+            if (searchKeyword) {
+                url += '?keyword=' + encodeURIComponent(searchKeyword);
+            }
+            fetch(url)
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success) {
+                        const tbody = document.getElementById('usersTableBody');
+                        tbody.innerHTML = result.data.map(user => `
+                            <tr>
+                                <td>${user.username}</td>
+                                <td>${user.email}</td>
+                                <td>${user.phone || '-'}</td>
+                                <td>${user.status === 1 ? '正常' : '禁用'}</td>
+                                <td>${user.createdAt}</td>
+                                <td>
+                                    <button class="action-btn edit" onclick="showEditUserChoice(${user.id}, '${user.username}')">编辑</button>
+                                    <button class="action-btn delete" onclick="deleteUser(${user.id}, '${user.username}')">注销</button>
+                                </td>
+                            </tr>
+                        `).join('');
+                    }
+                    // 数据加载完成后恢复滚动位置
+                    scheduleRestoreScroll();
+                });
+        }
+        
+        function loadAdmins() {
+            fetch('http://localhost:8080/flight-booking/api/admin/list')
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success) {
+                        const tbody = document.getElementById('adminsTableBody');
+                        tbody.innerHTML = result.data.map(admin => `
+                            <tr>
+                                <td>${admin.username}</td>
+                                <td>${admin.email}</td>
+                                <td>${admin.realName || '-'}</td>
+                                <td>${admin.role || 'ADMIN'}</td>
+                                <td>${admin.status === 1 ? '正常' : '禁用'}</td>
+                                <td>
+                                    <button class="action-btn edit" onclick="editAdmin(${admin.id})">编辑</button>
+                                    <button class="action-btn delete" onclick="deleteAdmin(${admin.id})">删除</button>
+                                </td>
+                            </tr>
+                        `).join('');
+                    } else {
+                        const tbody = document.getElementById('adminsTableBody');
+                        tbody.innerHTML = '<tr><td colspan="6">暂无管理员数据</td></tr>';
+                    }
+                })
+                .catch(error => {
+                    console.error('加载管理员列表失败:', error);
+                    const tbody = document.getElementById('adminsTableBody');
+                    tbody.innerHTML = '<tr><td colspan="6">加载失败</td></tr>';
+                });
+        }
+        
+        function showAddFlightModal() {
+            document.getElementById('addFlightModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeAddFlightModal() {
+            document.getElementById('addFlightModal').style.display = 'none';
+            document.body.style.overflow = '';
+            // 关闭所有下拉框
+            document.querySelectorAll('.city-dropdown').forEach(d => d.classList.remove('show'));
+            // 重置为具体日期模式
+            document.querySelector('input[name="flightSchedule"][value="specific"]').checked = true;
+            toggleFlightSchedule();
+        }
+        
+        // 切换航班周期类型
+        function toggleFlightSchedule() {
+            const scheduleType = document.querySelector('input[name="flightSchedule"]:checked').value;
+            
+            if (scheduleType === 'specific') {
+                // 具体日期模式
+                document.getElementById('specificDateGroup').style.display = 'block';
+                document.getElementById('specificArrivalGroup').style.display = 'block';
+                document.getElementById('dailyTimeGroup').style.display = 'none';
+                document.getElementById('dailyArrivalGroup').style.display = 'none';
+            } else {
+                // 每天都有模式
+                document.getElementById('specificDateGroup').style.display = 'none';
+                document.getElementById('specificArrivalGroup').style.display = 'none';
+                document.getElementById('dailyTimeGroup').style.display = 'block';
+                document.getElementById('dailyArrivalGroup').style.display = 'block';
+            }
+        }
+        
+        // 城市和机场数据
+        const cityAirportData = [
+            { city: '北京', code: 'PEK', name: '首都国际机场' },
+            { city: '北京', code: 'PKX', name: '大兴国际机场' },
+            { city: '上海', code: 'PVG', name: '浦东国际机场' },
+            { city: '上海', code: 'SHA', name: '虹桥国际机场' },
+            { city: '广州', code: 'CAN', name: '白云国际机场' },
+            { city: '深圳', code: 'SZX', name: '宝安国际机场' },
+            { city: '成都', code: 'CTU', name: '双流国际机场' },
+            { city: '成都', code: 'TFU', name: '天府国际机场' },
+            { city: '杭州', code: 'HGH', name: '萧山国际机场' },
+            { city: '重庆', code: 'CKG', name: '江北国际机场' },
+            { city: '西安', code: 'XIY', name: '咸阳国际机场' },
+            { city: '昆明', code: 'KMG', name: '长水国际机场' },
+            { city: '厦门', code: 'XMN', name: '高崎国际机场' },
+            { city: '武汉', code: 'WUH', name: '天河国际机场' },
+            { city: '南京', code: 'NKG', name: '禄口国际机场' },
+            { city: '青岛', code: 'TAO', name: '胶东国际机场' },
+            { city: '大连', code: 'DLC', name: '周水子国际机场' },
+            { city: '郑州', code: 'CGO', name: '新郑国际机场' },
+            { city: '长沙', code: 'CSX', name: '黄花国际机场' },
+            { city: '天津', code: 'TSN', name: '滨海国际机场' },
+            { city: '福州', code: 'FOC', name: '长乐国际机场' },
+            { city: '哈尔滨', code: 'HRB', name: '太平国际机场' },
+            { city: '沈阳', code: 'SHE', name: '桃仙国际机场' },
+            { city: '济南', code: 'TNA', name: '遥墙国际机场' },
+            { city: '海口', code: 'HAK', name: '美兰国际机场' },
+            { city: '三亚', code: 'SYX', name: '凤凰国际机场' },
+            { city: '乌鲁木齐', code: 'URC', name: '地窝堡国际机场' },
+            { city: '贵阳', code: 'KWE', name: '龙洞堡国际机场' },
+            { city: '南宁', code: 'NNG', name: '吴圩国际机场' },
+            { city: '合肥', code: 'HFE', name: '新桥国际机场' },
+            { city: '石家庄', code: 'SJW', name: '正定国际机场' },
+            { city: '南昌', code: 'KHN', name: '昌北国际机场' },
+            { city: '太原', code: 'TYN', name: '武宿国际机场' },
+            { city: '长春', code: 'CGQ', name: '龙嘉国际机场' },
+            { city: '呼和浩特', code: 'HET', name: '白塔国际机场' },
+            { city: '兰州', code: 'LHW', name: '中川国际机场' },
+            { city: '银川', code: 'INC', name: '河东国际机场' },
+            { city: '西宁', code: 'XNN', name: '曹家堡国际机场' },
+            { city: '拉萨', code: 'LXA', name: '贡嘎国际机场' },
+            { city: '温州', code: 'WNZ', name: '龙湾国际机场' },
+            { city: '宁波', code: 'NGB', name: '栎社国际机场' },
+            { city: '无锡', code: 'WUX', name: '硕放国际机场' },
+            { city: '常州', code: 'CZX', name: '奔牛国际机场' },
+            { city: '烟台', code: 'YNT', name: '蓬莱国际机场' },
+            { city: '泉州', code: 'JJN', name: '晋江国际机场' },
+            { city: '珠海', code: 'ZUH', name: '金湾国际机场' },
+            { city: '桂林', code: 'KWL', name: '两江国际机场' },
+            { city: '丽江', code: 'LJG', name: '三义国际机场' },
+            { city: '西双版纳', code: 'JHG', name: '嘎洒国际机场' },
+            { city: '东京', code: 'NRT', name: '成田国际机场' },
+            { city: '东京', code: 'HND', name: '羽田机场' },
+            { city: '大阪', code: 'KIX', name: '关西国际机场' },
+            { city: '首尔', code: 'ICN', name: '仁川国际机场' },
+            { city: '新加坡', code: 'SIN', name: '樟宜国际机场' },
+            { city: '曼谷', code: 'BKK', name: '素万那普国际机场' },
+            { city: '曼谷', code: 'DMK', name: '廊曼国际机场' },
+            { city: '吉隆坡', code: 'KUL', name: '吉隆坡国际机场' },
+            { city: '纽约', code: 'JFK', name: '肯尼迪国际机场' },
+            { city: '纽约', code: 'EWR', name: '纽瓦克国际机场' },
+            { city: '洛杉矶', code: 'LAX', name: '洛杉矶国际机场' },
+            { city: '旧金山', code: 'SFO', name: '旧金山国际机场' },
+            { city: '伦敦', code: 'LHR', name: '希思罗国际机场' },
+            { city: '巴黎', code: 'CDG', name: '戴高乐国际机场' },
+            { city: '悉尼', code: 'SYD', name: '金斯福德史密斯国际机场' },
+            { city: '墨尔本', code: 'MEL', name: '墨尔本国际机场' }
+        ];
+        
+        // 显示城市下拉框
+        function showCityDropdown(type) {
+            const input = document.getElementById(type + 'City');
+            const dropdown = document.getElementById(type + 'CityDropdown');
+            const value = input.value.trim();
+            
+            // 过滤城市
+            const filtered = cityAirportData.filter(item => 
+                item.city.includes(value) || value === ''
+            );
+            
+            // 去重
+            const uniqueCities = [...new Map(filtered.map(item => [item.city, item])).values()];
+            
+            // 渲染下拉框
+            dropdown.innerHTML = uniqueCities.map(item => 
+                `<div class="city-dropdown-item" onclick="selectCity('${type}', '${item.city}')">
+                    <span class="city-name">${item.city}</span>
+                </div>`
+            ).join('');
+            
+            dropdown.classList.add('show');
+        }
+        
+        // 选择城市
+        function selectCity(type, city) {
+            document.getElementById(type + 'City').value = city;
+            document.getElementById(type + 'CityDropdown').classList.remove('show');
+            
+            // 自动填充该城市的第一个机场代码
+            const airport = cityAirportData.find(item => item.city === city);
+            if (airport) {
+                document.getElementById(type + 'Code').value = airport.code;
+            }
+        }
+        
+        // 过滤城市
+        function filterCities(type) {
+            showCityDropdown(type);
+        }
+        
+        // 显示机场下拉框
+        function showAirportDropdown(type) {
+            const input = document.getElementById(type + 'Code');
+            const dropdown = document.getElementById(type + 'CodeDropdown');
+            const value = input.value.trim();
+            
+            // 过滤机场
+            const filtered = cityAirportData.filter(item => 
+                item.code.includes(value.toUpperCase()) || 
+                item.name.includes(value) || 
+                item.city.includes(value) ||
+                value === ''
+            );
+            
+            // 渲染下拉框
+            dropdown.innerHTML = filtered.map(item => 
+                `<div class="city-dropdown-item" onclick="selectAirport('${type}', '${item.code}', '${item.city}')">
+                    <span class="city-name">${item.city}</span>
+                    <span class="airport-code">${item.code}</span>
+                    <span class="airport-code">${item.name}</span>
+                </div>`
+            ).join('');
+            
+            dropdown.classList.add('show');
+        }
+        
+        // 选择机场
+        function selectAirport(type, code, city) {
+            document.getElementById(type + 'Code').value = code;
+            document.getElementById(type + 'CodeDropdown').classList.remove('show');
+            
+            // 自动填充城市
+            document.getElementById(type + 'City').value = city;
+        }
+        
+        // 过滤机场
+        function filterAirports(type) {
+            showAirportDropdown(type);
+        }
+        
+        // 点击外部关闭下拉框
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.city-select-wrapper')) {
+                document.querySelectorAll('.city-dropdown').forEach(d => d.classList.remove('show'));
+            }
+        });
+        
+        // 编辑航班弹窗的城市选择功能
+        function showEditCityDropdown(type) {
+            const input = document.getElementById('edit' + type.charAt(0).toUpperCase() + type.slice(1) + 'City');
+            const dropdown = document.getElementById('edit' + type.charAt(0).toUpperCase() + type.slice(1) + 'CityDropdown');
+            const value = input.value.trim();
+            
+            const filtered = cityAirportData.filter(item => 
+                item.city.includes(value) || value === ''
+            );
+            
+            const uniqueCities = [...new Map(filtered.map(item => [item.city, item])).values()];
+            
+            dropdown.innerHTML = uniqueCities.map(item => 
+                `<div class="city-dropdown-item" onclick="selectEditCity('${type}', '${item.city}')">
+                    <span class="city-name">${item.city}</span>
+                </div>`
+            ).join('');
+            
+            dropdown.classList.add('show');
+        }
+        
+        function selectEditCity(type, city) {
+            document.getElementById('edit' + type.charAt(0).toUpperCase() + type.slice(1) + 'City').value = city;
+            document.getElementById('edit' + type.charAt(0).toUpperCase() + type.slice(1) + 'CityDropdown').classList.remove('show');
+            
+            const airport = cityAirportData.find(item => item.city === city);
+            if (airport) {
+                document.getElementById('edit' + type.charAt(0).toUpperCase() + type.slice(1) + 'Code').value = airport.code;
+            }
+        }
+        
+        function filterEditCities(type) {
+            showEditCityDropdown(type);
+        }
+        
+        function showEditAirportDropdown(type) {
+            const input = document.getElementById('edit' + type.charAt(0).toUpperCase() + type.slice(1) + 'Code');
+            const dropdown = document.getElementById('edit' + type.charAt(0).toUpperCase() + type.slice(1) + 'CodeDropdown');
+            const value = input.value.trim();
+            
+            const filtered = cityAirportData.filter(item => 
+                item.code.includes(value.toUpperCase()) || 
+                item.name.includes(value) || 
+                item.city.includes(value) ||
+                value === ''
+            );
+            
+            dropdown.innerHTML = filtered.map(item => 
+                `<div class="city-dropdown-item" onclick="selectEditAirport('${type}', '${item.code}', '${item.city}')">
+                    <span class="city-name">${item.city}</span>
+                    <span class="airport-code">${item.code}</span>
+                    <span class="airport-code">${item.name}</span>
+                </div>`
+            ).join('');
+            
+            dropdown.classList.add('show');
+        }
+        
+        function selectEditAirport(type, code, city) {
+            document.getElementById('edit' + type.charAt(0).toUpperCase() + type.slice(1) + 'Code').value = code;
+            document.getElementById('edit' + type.charAt(0).toUpperCase() + type.slice(1) + 'CodeDropdown').classList.remove('show');
+            document.getElementById('edit' + type.charAt(0).toUpperCase() + type.slice(1) + 'City').value = city;
+        }
+        
+        function filterEditAirports(type) {
+            showEditAirportDropdown(type);
+        }
+        
+        function addFlight() {
+            // 获取航班周期类型
+            const scheduleType = document.querySelector('input[name="flightSchedule"]:checked').value;
+            
+            // 表单验证
+            const flightNumber = document.getElementById('flightNumber').value.trim();
+            const departureCity = document.getElementById('departureCity').value.trim();
+            const departureCode = document.getElementById('departureCode').value.trim();
+            const destinationCity = document.getElementById('destinationCity').value.trim();
+            const destinationCode = document.getElementById('destinationCode').value.trim();
+            const price = document.getElementById('price').value;
+            const totalSeats = document.getElementById('totalSeats').value;
+            const airline = document.getElementById('airline').value.trim();
+            
+            let departureTime, arrivalTime;
+            
+            if (scheduleType === 'specific') {
+                // 具体日期模式
+                departureTime = document.getElementById('departureTime').value;
+                arrivalTime = document.getElementById('arrivalTime').value;
+                
+                if (!departureTime || !arrivalTime) {
+                    alert('请选择出发和到达日期时间');
+                    return;
+                }
+            } else {
+                // 每天都有模式
+                const departureTimeDaily = document.getElementById('departureTimeDaily').value;
+                const arrivalTimeDaily = document.getElementById('arrivalTimeDaily').value;
+                
+                if (!departureTimeDaily || !arrivalTimeDaily) {
+                    alert('请选择出发和到达时间');
+                    return;
+                }
+                
+                // 将时间格式转换为后端需要的格式（使用今天的日期）
+                const today = new Date().toISOString().split('T')[0];
+                departureTime = today + 'T' + departureTimeDaily;
+                arrivalTime = today + 'T' + arrivalTimeDaily;
+            }
+            
+            if (!flightNumber || !departureCity || !departureCode || !destinationCity || !destinationCode || 
+                !price || !totalSeats || !airline) {
+                alert('请填写完整的航班信息');
+                return;
+            }
+            
+            // 检查航班号是否已存在
+            const existingFlight = currentFlightsData.find(f => f.flightNumber === flightNumber);
+            if (existingFlight) {
+                alert('航班号 ' + flightNumber + ' 已存在，请使用其他航班号');
+                return;
+            }
+            
+            const flightData = {
+                flightNumber: flightNumber,
+                departureCity: departureCity,
+                departureCode: departureCode,
+                destinationCity: destinationCity,
+                destinationCode: destinationCode,
+                departureTime: departureTime,
+                arrivalTime: arrivalTime,
+                price: parseFloat(price),
+                cabinType: document.getElementById('cabinType').value,
+                totalSeats: parseInt(totalSeats),
+                availableSeats: parseInt(totalSeats),
+                airline: airline,
+                flightType: scheduleType === 'daily' ? 'regular' : 'special',
+                status: 1
+            };
+            
+            fetch('http://localhost:8080/flight-booking/api/flights', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(flightData)
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('网络请求失败: ' + res.status);
+                }
+                return res.json();
+            })
+            .then(result => {
+                if (result.success) {
+                    alert('航班添加成功');
+                    closeAddFlightModal();
+                    loadFlights();
+                } else {
+                    alert('添加失败: ' + (result.message || '未知错误'));
+                }
+            })
+            .catch(error => {
+                console.error('添加航班失败:', error);
+                alert('添加航班失败: ' + error.message);
+            });
+        }
+        
+        function editOrder(id) {
+            console.log('编辑订单:', id);
+            // 先获取订单详情（从admin_orders表）
+            fetch(`http://localhost:8080/flight-booking/api/admin/orders/${id}`)
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success) {
+                        const order = result.data;
+                        // 填充表单
+                        document.getElementById('editOrderId').value = order.id;
+                        document.getElementById('editOrderNo').value = order.orderNo;
+                        document.getElementById('editFlightNumber').value = order.flightNumber;
+                        document.getElementById('editPassengerName').value = order.passengerName;
+                        document.getElementById('editPassengerId').value = order.passengerId;
+                        document.getElementById('editPassengerPhone').value = order.passengerPhone;
+                        document.getElementById('editOrderStatus').value = order.status;
+                        document.getElementById('editPaymentMethod').value = order.paymentMethod || '';
+                        
+                        // 显示弹窗
+                        document.getElementById('editOrderModal').style.display = 'flex';
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        alert('获取订单详情失败: ' + result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('获取订单详情失败:', error);
+                    alert('获取订单详情失败');
+                });
+        }
+        
+        function closeEditOrderModal() {
+            document.getElementById('editOrderModal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        
+        // 编辑用户
+        function showEditUserChoice(id, username) {
+            document.getElementById('editUserChoiceId').value = id;
+            document.getElementById('editUserChoiceUsername').value = username;
+            document.getElementById('editUserChoiceModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeEditUserChoiceModal() {
+            document.getElementById('editUserChoiceModal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        
+        function editUserInfo() {
+            const id = document.getElementById('editUserChoiceId').value;
+            closeEditUserChoiceModal();
+            editUser(id);
+        }
+        
+        function editUserPassengers() {
+            const username = document.getElementById('editUserChoiceUsername').value;
+            closeEditUserChoiceModal();
+            editUserPassengersModal(username);
+        }
+        
+        function editUserPassengersModal(username) {
+            document.getElementById('editPassengerUsername').value = username;
+            document.getElementById('editPassengerUsernameDisplay').textContent = username;
+            loadUserPassengersForEdit(username);
+            document.getElementById('editUserPassengersModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeEditUserPassengersModal() {
+            document.getElementById('editUserPassengersModal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        
+        function loadUserPassengersForEdit(username) {
+            const passengersKey = `${username}_passengers`;
+            const savedPassengers = localStorage.getItem(passengersKey);
+            const passengers = savedPassengers ? JSON.parse(savedPassengers) : [];
+            
+            const listContainer = document.getElementById('editPassengersList');
+            if (passengers.length === 0) {
+                listContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">暂无乘客信息</div>';
+                return;
+            }
+            
+            listContainer.innerHTML = passengers.map((p, index) => `
+                <div style="background: #f8f9ff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 15px; margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <strong style="font-size: 16px;">${p.name}</strong>
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="editUserPassenger('${username}', ${index})" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border: none; padding: 5px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);">修改</button>
+                            <button onclick="deleteUserPassenger('${username}', ${index})" style="background: #f44336; color: #fff; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">删除</button>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 14px;">
+                        <div><span style="color: #999;">身份证：</span>${p.id}</div>
+                        <div><span style="color: #999;">手机：</span>${p.phone}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function showAddPassengerForm() {
+            const username = document.getElementById('editPassengerUsername').value;
+            document.getElementById('addPassengerUsername').value = username;
+            document.getElementById('addPassengerName').value = '';
+            document.getElementById('addPassengerId').value = '';
+            document.getElementById('addPassengerPhone').value = '';
+            document.getElementById('addPassengerModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeAddPassengerModal() {
+            document.getElementById('addPassengerModal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        
+        function addPassengerForUser() {
+            const username = document.getElementById('addPassengerUsername').value;
+            const name = document.getElementById('addPassengerName').value.trim();
+            const id = document.getElementById('addPassengerId').value.trim();
+            const phone = document.getElementById('addPassengerPhone').value.trim();
+            
+            if (!name || !id || !phone) {
+                alert('请填写完整的乘客信息');
+                return;
+            }
+            
+            const idRegex = /^[1-9]\d{5}(18|19|20)?\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[\dXx]?$/;
+            if (!idRegex.test(id)) {
+                alert('请输入有效的身份证号码');
+                return;
+            }
+            
+            if (!/^1[3-9]\d{9}$/.test(phone)) {
+                alert('请输入有效的手机号码');
+                return;
+            }
+            
+            const passengersKey = `${username}_passengers`;
+            const savedPassengers = localStorage.getItem(passengersKey);
+            let passengers = savedPassengers ? JSON.parse(savedPassengers) : [];
+            
+            passengers.push({ name, id, phone });
+            localStorage.setItem(passengersKey, JSON.stringify(passengers));
+            
+            closeAddPassengerModal();
+            loadUserPassengersForEdit(username);
+            alert('乘客添加成功');
+        }
+        
+        function editUserPassenger(username, index) {
+            const passengersKey = `${username}_passengers`;
+            const savedPassengers = localStorage.getItem(passengersKey);
+            const passengers = savedPassengers ? JSON.parse(savedPassengers) : [];
+            const passenger = passengers[index];
+            
+            document.getElementById('editSinglePassengerUsername').value = username;
+            document.getElementById('editSinglePassengerIndex').value = index;
+            document.getElementById('editSinglePassengerName').value = passenger.name;
+            document.getElementById('editSinglePassengerId').value = passenger.id;
+            document.getElementById('editSinglePassengerPhone').value = passenger.phone;
+            
+            document.getElementById('editSinglePassengerModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeEditSinglePassengerModal() {
+            document.getElementById('editSinglePassengerModal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        
+        function saveSinglePassengerEdit() {
+            const username = document.getElementById('editSinglePassengerUsername').value;
+            const index = parseInt(document.getElementById('editSinglePassengerIndex').value);
+            const name = document.getElementById('editSinglePassengerName').value.trim();
+            const id = document.getElementById('editSinglePassengerId').value.trim();
+            const phone = document.getElementById('editSinglePassengerPhone').value.trim();
+            
+            if (!name || !id || !phone) {
+                alert('请填写完整的乘客信息');
+                return;
+            }
+            
+            const idRegex = /^[1-9]\d{5}(18|19|20)?\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[\dXx]?$/;
+            if (!idRegex.test(id)) {
+                alert('请输入有效的身份证号码');
+                return;
+            }
+            
+            if (!/^1[3-9]\d{9}$/.test(phone)) {
+                alert('请输入有效的手机号码');
+                return;
+            }
+            
+            const passengersKey = `${username}_passengers`;
+            const savedPassengers = localStorage.getItem(passengersKey);
+            let passengers = savedPassengers ? JSON.parse(savedPassengers) : [];
+            
+            passengers[index] = { name, id, phone };
+            localStorage.setItem(passengersKey, JSON.stringify(passengers));
+            
+            closeEditSinglePassengerModal();
+            loadUserPassengersForEdit(username);
+            alert('乘客信息修改成功');
+        }
+        
+        function deleteUserPassenger(username, index) {
+            if (!confirm('确定删除该乘客吗？')) return;
+            
+            const passengersKey = `${username}_passengers`;
+            const savedPassengers = localStorage.getItem(passengersKey);
+            let passengers = savedPassengers ? JSON.parse(savedPassengers) : [];
+            
+            passengers.splice(index, 1);
+            localStorage.setItem(passengersKey, JSON.stringify(passengers));
+            
+            loadUserPassengersForEdit(username);
+            alert('乘客已删除');
+        }
+        
+        function addPassengerForUser() {
+            const username = document.getElementById('editPassengerUsername').value;
+            const name = document.getElementById('newPassengerName').value.trim();
+            const id = document.getElementById('newPassengerId').value.trim();
+            const phone = document.getElementById('newPassengerPhone').value.trim();
+            
+            if (!name || !id || !phone) {
+                alert('请填写完整的乘客信息');
+                return;
+            }
+            
+            const idRegex = /^[1-9]\d{5}(18|19|20)?\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[\dXx]?$/;
+            if (!idRegex.test(id)) {
+                alert('请输入有效的身份证号码');
+                return;
+            }
+            
+            if (!/^1[3-9]\d{9}$/.test(phone)) {
+                alert('请输入有效的手机号码');
+                return;
+            }
+            
+            const passengersKey = `${username}_passengers`;
+            const savedPassengers = localStorage.getItem(passengersKey);
+            let passengers = savedPassengers ? JSON.parse(savedPassengers) : [];
+            
+            passengers.push({ name, id, phone });
+            localStorage.setItem(passengersKey, JSON.stringify(passengers));
+            
+            document.getElementById('newPassengerName').value = '';
+            document.getElementById('newPassengerId').value = '';
+            document.getElementById('newPassengerPhone').value = '';
+            
+            loadUserPassengersForEdit(username);
+            alert('乘客添加成功');
+        }
+        
+        function editUser(id) {
+            console.log('编辑用户:', id);
+            fetch(`http://localhost:8080/flight-booking/api/users/${id}`)
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success) {
+                        const user = result.data;
+                        document.getElementById('editUserId').value = user.id;
+                        document.getElementById('editUsername').value = user.username;
+                        document.getElementById('editEmail').value = user.email || '';
+                        document.getElementById('editPhone').value = user.phone || '';
+                        document.getElementById('editRealName').value = user.realName || '';
+                        document.getElementById('editUserStatus').value = user.status;
+                        
+                        document.getElementById('editUserModal').style.display = 'flex';
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        alert('获取用户信息失败: ' + result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('获取用户信息失败:', error);
+                    alert('获取用户信息失败');
+                });
+        }
+        
+        function closeEditUserModal() {
+            document.getElementById('editUserModal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        
+        function deleteUser(id, username) {
+            if (!confirm(`确定要注销用户 "${username}" 吗？`)) return;
+            
+            fetch(`http://localhost:8080/flight-booking/api/users/${id}`, {
+                method: 'DELETE'
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    alert('用户已注销');
+                    loadUsers();
+                } else {
+                    alert('注销失败: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('注销用户失败:', error);
+                alert('注销用户失败');
+            });
+        }
+        
+        function saveUser() {
+            const userData = {
+                id: document.getElementById('editUserId').value,
+                email: document.getElementById('editEmail').value,
+                phone: document.getElementById('editPhone').value,
+                realName: document.getElementById('editRealName').value,
+                status: parseInt(document.getElementById('editUserStatus').value)
+            };
+            
+            fetch('http://localhost:8080/flight-booking/api/users/update', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    alert('用户信息更新成功');
+                    closeEditUserModal();
+                    loadUsers();
+                } else {
+                    alert('更新失败: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('更新用户失败:', error);
+                alert('更新用户失败');
+            });
+        }
+        
+        function saveOrder() {
+            const orderData = {
+                id: document.getElementById('editOrderId').value,
+                flightNumber: document.getElementById('editFlightNumber').value,
+                passengerName: document.getElementById('editPassengerName').value,
+                passengerId: document.getElementById('editPassengerId').value,
+                passengerPhone: document.getElementById('editPassengerPhone').value,
+                status: parseInt(document.getElementById('editOrderStatus').value),
+                paymentMethod: document.getElementById('editPaymentMethod').value
+            };
+            
+            // 更新管理员订单，后端会同步更新两个表
+            fetch('http://localhost:8080/flight-booking/api/admin/orders/update', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData)
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    alert('订单更新成功');
+                    closeEditOrderModal();
+                    loadOrders();
+                } else {
+                    alert('更新失败: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('更新订单失败:', error);
+                alert('更新订单失败');
+            });
+        }
+        
+        function editOrder(id) {
+            console.log('编辑订单:', id);
+            // 先获取订单详情（从admin_orders表）
+            fetch(`http://localhost:8080/flight-booking/api/admin/orders/${id}`)
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success) {
+                        const order = result.data;
+                        // 填充表单
+                        document.getElementById('editOrderId').value = order.id;
+                        document.getElementById('editOrderNo').value = order.orderNo;
+                        document.getElementById('editFlightNumber').value = order.flightNumber;
+                        document.getElementById('editPassengerName').value = order.passengerName;
+                        document.getElementById('editPassengerId').value = order.passengerId;
+                        document.getElementById('editPassengerPhone').value = order.passengerPhone;
+                        document.getElementById('editOrderStatus').value = order.status;
+                        document.getElementById('editPaymentMethod').value = order.paymentMethod || '';
+                        
+                        // 显示弹窗
+                        document.getElementById('editOrderModal').style.display = 'flex';
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        alert('获取订单详情失败: ' + result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('获取订单详情失败:', error);
+                    alert('获取订单详情失败');
+                });
+        }
+        
+        function closeEditOrderModal() {
+            document.getElementById('editOrderModal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        
+        
+        function editFlight(id) {
+            // 从当前已加载的航班列表中查找
+            const flight = currentFlightsData.find(f => f.id === id);
+            
+            if (!flight) {
+                alert('未找到航班信息，请刷新后重试');
+                return;
+            }
+            
+            // 填充表单
+            document.getElementById('editFlightId').value = flight.id;
+            document.getElementById('editFlightNumber').value = flight.flightNumber;
+            document.getElementById('editDepartureCity').value = flight.departureCity;
+            document.getElementById('editDepartureCode').value = flight.departureCode;
+            document.getElementById('editDestinationCity').value = flight.destinationCity;
+            document.getElementById('editDestinationCode').value = flight.destinationCode;
+            document.getElementById('editDepartureTime').value = flight.departureTime;
+            document.getElementById('editArrivalTime').value = flight.arrivalTime;
+            document.getElementById('editPrice').value = flight.price;
+            document.getElementById('editCabinType').value = flight.cabinType || 'economy';
+            document.getElementById('editTotalSeats').value = flight.totalSeats;
+            document.getElementById('editAvailableSeats').value = flight.availableSeats;
+            document.getElementById('editAirline').value = flight.airline;
+            document.getElementById('editFlightType').value = flight.flightType || 'domestic';
+            document.getElementById('editFlightStatus').value = flight.status;
+            
+            // 显示弹窗
+            document.getElementById('editFlightModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeEditFlightModal() {
+            document.getElementById('editFlightModal').style.display = 'none';
+            document.body.style.overflow = '';
+            // 关闭所有下拉框
+            document.querySelectorAll('#editFlightModal .city-dropdown').forEach(d => d.classList.remove('show'));
+        }
+        
+        function saveEditFlight() {
+            const id = document.getElementById('editFlightId').value;
+            const flightData = {
+                flightNumber: document.getElementById('editFlightNumber').value.trim(),
+                departureCity: document.getElementById('editDepartureCity').value.trim(),
+                departureCode: document.getElementById('editDepartureCode').value.trim(),
+                destinationCity: document.getElementById('editDestinationCity').value.trim(),
+                destinationCode: document.getElementById('editDestinationCode').value.trim(),
+                departureTime: document.getElementById('editDepartureTime').value,
+                arrivalTime: document.getElementById('editArrivalTime').value,
+                price: parseFloat(document.getElementById('editPrice').value),
+                cabinType: document.getElementById('editCabinType').value,
+                totalSeats: parseInt(document.getElementById('editTotalSeats').value),
+                availableSeats: parseInt(document.getElementById('editAvailableSeats').value),
+                airline: document.getElementById('editAirline').value.trim(),
+                flightType: document.getElementById('editFlightType').value,
+                status: parseInt(document.getElementById('editFlightStatus').value)
+            };
+            
+            // 表单验证
+            if (!flightData.flightNumber || !flightData.departureCity || !flightData.departureCode || 
+                !flightData.destinationCity || !flightData.destinationCode || !flightData.departureTime || 
+                !flightData.arrivalTime || !flightData.price || !flightData.totalSeats || !flightData.airline) {
+                alert('请填写完整的航班信息');
+                return;
+            }
+            
+            fetch(`http://localhost:8080/flight-booking/api/flights/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(flightData)
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('网络请求失败: ' + res.status);
+                }
+                return res.json();
+            })
+            .then(result => {
+                if (result.success) {
+                    alert('航班更新成功');
+                    closeEditFlightModal();
+                    loadFlights();
+                } else {
+                    alert('更新失败: ' + (result.message || '未知错误'));
+                }
+            })
+            .catch(error => {
+                console.error('更新航班失败:', error);
+                alert('更新航班失败: ' + error.message);
+            });
+        }
+        
+        function deleteFlight(id) {
+            if (confirm('确定删除此航班？')) {
+                fetch(`http://localhost:8080/flight-booking/api/flights/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success) {
+                        alert('删除成功');
+                        loadFlights();
+                    } else {
+                        alert('删除失败: ' + result.message);
+                    }
+                });
+            }
+        }
+        
+        // 编辑管理员
+        function editAdmin(id) {
+            fetch(`http://localhost:8080/flight-booking/api/admin/${id}`)
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success) {
+                        const admin = result.data;
+                        document.getElementById('editAdminId').value = admin.id;
+                        document.getElementById('editAdminUsername').value = admin.username;
+                        document.getElementById('editAdminEmail').value = admin.email || '';
+                        document.getElementById('editAdminRealName').value = admin.realName || '';
+                        document.getElementById('editAdminPhone').value = admin.phone || '';
+                        document.getElementById('editAdminRole').value = admin.role || 'ADMIN';
+                        document.getElementById('editAdminStatus').value = admin.status;
+                        document.getElementById('editAdminPassword').value = '';
+                        
+                        document.getElementById('editAdminModal').style.display = 'flex';
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        alert('获取管理员信息失败: ' + result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('获取管理员信息失败:', error);
+                    alert('获取管理员信息失败');
+                });
+        }
+        
+        function closeEditAdminModal() {
+            document.getElementById('editAdminModal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        
+        function saveAdmin() {
+            const adminData = {
+                id: document.getElementById('editAdminId').value,
+                email: document.getElementById('editAdminEmail').value,
+                realName: document.getElementById('editAdminRealName').value,
+                phone: document.getElementById('editAdminPhone').value,
+                role: document.getElementById('editAdminRole').value,
+                status: parseInt(document.getElementById('editAdminStatus').value),
+                password: document.getElementById('editAdminPassword').value || undefined
+            };
+            
+            fetch('http://localhost:8080/flight-booking/api/admin/update', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(adminData)
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    alert('管理员信息更新成功');
+                    closeEditAdminModal();
+                    loadAdmins();
+                } else {
+                    alert('更新失败: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('更新管理员失败:', error);
+                alert('更新管理员失败');
+            });
+        }
+        
+        // 删除管理员
+        function deleteAdmin(id) {
+            if (confirm('确定删除此管理员？')) {
+                fetch(`http://localhost:8080/flight-booking/api/admin/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success) {
+                        alert('删除成功');
+                        loadAdmins();
+                    } else {
+                        alert('删除失败: ' + result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('删除管理员失败:', error);
+                    alert('删除管理员失败');
+                });
+            }
+        }
+        
+        // 添加管理员
+        function showAddAdminModal() {
+            document.getElementById('addAdminModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeAddAdminModal() {
+            document.getElementById('addAdminModal').style.display = 'none';
+            document.body.style.overflow = '';
+            // 清空表单
+            document.getElementById('addAdminUsername').value = '';
+            document.getElementById('addAdminEmail').value = '';
+            document.getElementById('addAdminRealName').value = '';
+            document.getElementById('addAdminPhone').value = '';
+            document.getElementById('addAdminRole').value = 'ADMIN';
+            document.getElementById('addAdminPassword').value = '';
+        }
+        
+        function addAdmin() {
+            const adminData = {
+                username: document.getElementById('addAdminUsername').value,
+                email: document.getElementById('addAdminEmail').value,
+                realName: document.getElementById('addAdminRealName').value,
+                phone: document.getElementById('addAdminPhone').value,
+                role: document.getElementById('addAdminRole').value,
+                password: document.getElementById('addAdminPassword').value
+            };
+            
+            fetch('http://localhost:8080/flight-booking/api/admin/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(adminData)
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    alert('管理员添加成功');
+                    closeAddAdminModal();
+                    loadAdmins();
+                } else {
+                    alert('添加失败: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('添加管理员失败:', error);
+                alert('添加管理员失败');
+            });
+        }
+        
+        // ========== 改签功能 ==========
+        let currentChangingOrder = null;
+        let availableFlights = [];
+        let selectedNewFlight = null;
+        let currentSelectedDate = '';
+        
+        // 管理员端改签航班
+        function changeFlightAdmin(orderId) {
+            // 获取订单详情
+            fetch(`http://localhost:8080/flight-booking/api/orders/admin/${orderId}`)
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success) {
+                        currentChangingOrder = result.data;
+                        
+                        // 设置默认日期为原订单日期或今天
+                        currentSelectedDate = currentChangingOrder.departureDate || new Date().toISOString().split('T')[0];
+                        
+                        // 加载航班数据
+                        loadFlightsForChange();
+                        
+                        // 显示弹窗
+                        document.getElementById('changeFlightModal').style.display = 'flex';
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        alert('获取订单信息失败: ' + result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('获取订单信息失败:', error);
+                    alert('获取订单信息失败');
+                });
+        }
+        
+        // 加载指定日期的航班
+        function loadFlightsForChange() {
+            if (!currentChangingOrder) return;
+            
+            fetch(`http://localhost:8080/flight-booking/api/flights/search?departure=${encodeURIComponent(currentChangingOrder.departureCity || '')}&destination=${encodeURIComponent(currentChangingOrder.destinationCity || '')}&date=${encodeURIComponent(currentSelectedDate)}`)
+                .then(res => res.json())
+                .then(flightResult => {
+                    if (flightResult.success) {
+                        availableFlights = flightResult.data;
+                        selectedNewFlight = null;
+                        
+                        // 重新渲染改签页面
+                        renderChangeFlightModal();
+                    }
+                });
+        }
+        
+        // 渲染改签弹窗内容
+        function renderChangeFlightModal() {
+            if (!currentChangingOrder) return;
+            
+            const changeHTML = `
+                <!-- 原订单信息 -->
+                <div style="margin-bottom: 25px;">
+                    <h4 style="color: #333; font-size: 15px; font-weight: 600; margin-bottom: 15px;">原订单信息</h4>
+                    <div style="background: #f8f9ff; border-radius: 12px; padding: 15px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span style="color: #666;">订单号</span>
+                            <span style="font-weight: 500;">${currentChangingOrder.orderNo}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span style="color: #666;">原航班</span>
+                            <span style="font-weight: 500;">${currentChangingOrder.flightNumber}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span style="color: #666;">原舱位</span>
+                            <span style="font-weight: 500;">${getCabinTypeName(currentChangingOrder.cabinType)}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #666;">乘客</span>
+                            <span style="font-weight: 500;">${currentChangingOrder.passengerName}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 选择日期 -->
+                <div style="margin-bottom: 25px;">
+                    <h4 style="color: #333; font-size: 15px; font-weight: 600; margin-bottom: 15px;">选择日期</h4>
+                    <div style="display: flex; gap: 10px;">
+                        ${generateDateOptions()}
+                    </div>
+                </div>
+                
+                <!-- 选择新航班 -->
+                <div style="margin-bottom: 20px;">
+                    <h4 style="color: #333; font-size: 15px; font-weight: 600; margin-bottom: 15px;">选择新航班</h4>
+                    <div id="flightOptions">
+                        ${availableFlights.map((flight, index) => `
+                            <div class="flight-option" data-flight-index="${index}" onclick="selectFlight(${index})" style="border: 2px solid #e0e0e0; border-radius: 12px; padding: 15px; margin-bottom: 12px; cursor: pointer; transition: all 0.3s;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <div style="font-weight: 600; color: #333; margin-bottom: 5px;">${flight.flightNumber}</div>
+                                        <div style="color: #666; font-size: 14px;">${flight.departureCity} (${flight.departureCode}) → ${flight.destinationCity} (${flight.destinationCode})</div>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div style="font-weight: 600; color: #e53935;" data-price="${flight.price}">¥${flight.price}</div>
+                                        <div style="font-size: 12px; color: #999;">经济舱</div>
+                                    </div>
+                                </div>
+                                <div style="margin-top: 10px; display: flex; justify-content: space-between; color: #666; font-size: 14px;">
+                                    <span>出发: ${flight.departureTime}</span>
+                                    <span>到达: ${flight.arrivalTime}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <!-- 选择舱室 -->
+                <div id="cabinSection" style="display: none; margin-bottom: 20px;">
+                    <h4 style="color: #333; font-size: 15px; font-weight: 600; margin-bottom: 15px;">选择舱室</h4>
+                    <div style="display: flex; gap: 15px;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="radio" name="cabinType" value="ECONOMY" checked onchange="updateFlightPrices(); calculateChangeFee()" style="width: 18px; height: 18px;">
+                            <span style="font-size: 14px;">经济舱</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="radio" name="cabinType" value="BUSINESS" onchange="updateFlightPrices(); calculateChangeFee()" style="width: 18px; height: 18px;">
+                            <span style="font-size: 14px;">商务舱 (1.5倍)</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="radio" name="cabinType" value="FIRST" onchange="updateFlightPrices(); calculateChangeFee()" style="width: 18px; height: 18px;">
+                            <span style="font-size: 14px;">头等舱 (2倍)</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- 改签费用 -->
+                <div id="changeFeeInfo" style="display: none; background: #fff3e0; border-radius: 12px; padding: 15px;">
+                    <h4 style="color: #333; font-size: 15px; font-weight: 600; margin-bottom: 10px;">费用信息</h4>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: #666;">原票价</span>
+                        <span>¥${currentChangingOrder.totalPrice || currentChangingOrder.price || 0}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: #666;">新票价</span>
+                        <span id="newPrice">¥0</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: #666;">手续费</span>
+                        <span>¥20</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-weight: 600; color: #e53935;">
+                        <span>需补差价</span>
+                        <span id="changeFee">¥0</span>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('changeFlightBody').innerHTML = changeHTML;
+        }
+        
+        // 获取舱室名称
+        function getCabinTypeName(cabinType) {
+            const cabinMap = {
+                'ECONOMY': '经济舱',
+                'BUSINESS': '商务舱',
+                'FIRST': '头等舱'
+            };
+            return cabinMap[cabinType] || cabinType || '经济舱';
+        }
+        
+        // 根据所选舱室更新所有航班价格显示
+        function updateFlightPrices() {
+            const cabinType = document.querySelector('input[name="cabinType"]:checked').value;
+            
+            let multiplier = 1;
+            let cabinName = '经济舱';
+            if (cabinType === 'BUSINESS') {
+                multiplier = 1.5;
+                cabinName = '商务舱';
+            } else if (cabinType === 'FIRST') {
+                multiplier = 2;
+                cabinName = '头等舱';
+            }
+            
+            // 更新所有航班的价格显示
+            document.querySelectorAll('.flight-option [data-price]').forEach(el => {
+                const basePrice = parseFloat(el.getAttribute('data-price'));
+                const newPrice = Math.round(basePrice * multiplier);
+                el.textContent = '¥' + newPrice;
+            });
+            
+            // 更新所有航班的舱室标签
+            document.querySelectorAll('.flight-option div:last-child div:last-child').forEach(el => {
+                el.textContent = cabinName;
+            });
+        }
+        
+        // 生成日期选项
+        function generateDateOptions() {
+            const dates = [];
+            const today = new Date();
+            
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                
+                const dateStr = date.toISOString().split('T')[0];
+                const month = date.getMonth() + 1;
+                const day = date.getDate();
+                const weekDay = ['日', '一', '二', '三', '四', '五', '六'][date.getDay()];
+                
+                const isSelected = dateStr === currentSelectedDate;
+                const isToday = i === 0;
+                
+                dates.push(`
+                    <button 
+                        onclick="selectDate('${dateStr}')" 
+                        style="width: 70px; padding: 12px 8px; border: none; border-radius: 10px; background: ${isSelected ? '#667eea' : '#f5f5f5'}; color: ${isSelected ? '#fff' : '#333'}; cursor: pointer; transition: all 0.3s; text-align: center;">
+                        <div style="font-size: 12px; margin-bottom: 4px;">${month}/${day}</div>
+                        <div style="font-size: 10px; opacity: 0.7;">周${weekDay}${isToday ? '<br/>今天' : ''}</div>
+                    </button>
+                `);
+            }
+            
+            return dates.join('');
+        }
+        
+        // 选择日期
+        function selectDate(dateStr) {
+            currentSelectedDate = dateStr;
+            
+            // 更新日期按钮选中状态
+            document.querySelectorAll('#changeFlightBody button').forEach(btn => {
+                btn.style.background = '#f5f5f5';
+                btn.style.color = '#333';
+            });
+            
+            // 加载该日期的航班
+            loadFlightsForChange();
+        }
+        
+        // 选择航班
+        function selectFlight(index) {
+            selectedNewFlight = availableFlights[index];
+            
+            // 更新选中状态
+            document.querySelectorAll('.flight-option').forEach((el, i) => {
+                el.style.borderColor = i === index ? '#667eea' : '#e0e0e0';
+                el.style.background = i === index ? '#f0f4ff' : '#fff';
+            });
+            
+            // 显示舱室选择
+            document.getElementById('cabinSection').style.display = 'block';
+            
+            // 计算费用
+            calculateChangeFee();
+            
+            // 启用确认按钮
+            document.getElementById('confirmChangeBtn').disabled = false;
+        }
+        
+        // 计算改签费用
+        function calculateChangeFee() {
+            if (!selectedNewFlight || !currentChangingOrder) return;
+            
+            // 获取选择的舱室
+            const cabinType = document.querySelector('input[name="cabinType"]:checked').value;
+            
+            // 根据舱室计算价格（经济舱基础价，商务舱1.5倍，头等舱2倍）
+            let basePrice = selectedNewFlight.price || 0;
+            let cabinMultiplier = 1;
+            if (cabinType === 'BUSINESS') cabinMultiplier = 1.5;
+            if (cabinType === 'FIRST') cabinMultiplier = 2;
+            const newPrice = Math.round(basePrice * cabinMultiplier);
+            
+            const originalPrice = currentChangingOrder.totalPrice || currentChangingOrder.price || 0;
+            const serviceFee = 20;
+            const diff = Math.max(0, newPrice - originalPrice);
+            const totalFee = diff + serviceFee;
+            
+            document.getElementById('newPrice').textContent = '¥' + newPrice;
+            document.getElementById('changeFee').textContent = '¥' + totalFee;
+            document.getElementById('changeFeeInfo').style.display = 'block';
+        }
+        
+        // 确认改签
+        function confirmChangeFlightAdmin() {
+            if (!selectedNewFlight || !currentChangingOrder) return;
+            
+            const btn = document.getElementById('confirmChangeBtn');
+            const originalText = btn.textContent;
+            btn.textContent = '处理中...';
+            btn.disabled = true;
+            
+            // 获取选择的舱室
+            const cabinType = document.querySelector('input[name="cabinType"]:checked').value;
+            
+            // 根据舱室计算价格
+            let basePrice = selectedNewFlight.price || 0;
+            let cabinMultiplier = 1;
+            if (cabinType === 'BUSINESS') cabinMultiplier = 1.5;
+            if (cabinType === 'FIRST') cabinMultiplier = 2;
+            const newPrice = Math.round(basePrice * cabinMultiplier);
+            
+            fetch(`http://localhost:8080/flight-booking/api/orders/${currentChangingOrder.id}/change`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    newFlightNumber: selectedNewFlight.flightNumber,
+                    newDepartureDate: currentSelectedDate,
+                    newDepartureTime: selectedNewFlight.departureTime,
+                    newArrivalTime: selectedNewFlight.arrivalTime,
+                    newPrice: newPrice,
+                    newCabinType: cabinType
+                })
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    alert('改签成功');
+                    closeChangeFlightModal();
+                    loadOrders();
+                } else {
+                    alert('改签失败: ' + result.message);
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('改签失败:', error);
+                alert('改签失败');
+                btn.textContent = originalText;
+                btn.disabled = false;
+            });
+        }
+        
+        // 关闭改签弹窗
+        function closeChangeFlightModal() {
+            document.getElementById('changeFlightModal').style.display = 'none';
+            document.body.style.overflow = '';
+            currentChangingOrder = null;
+            availableFlights = [];
+            selectedNewFlight = null;
+            currentSelectedDate = '';
+        }
+        
+        // ========== 订单详情功能 ==========
+        // 查看订单详情
+        function viewOrder(orderId) {
+            fetch(`http://localhost:8080/flight-booking/api/admin/orders/${orderId}`)
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success) {
+                        const order = result.data;
+                        const statusMap = {1: '待支付', 2: '已支付', 3: '已完成', 4: '已取消', 5: '已过期'};
+                        const cabinMap = {'ECONOMY': '经济舱', 'BUSINESS': '商务舱', 'FIRST': '头等舱', 'economy': '经济舱', 'business': '商务舱', 'first': '头等舱'};
+                        
+                        const detailHTML = `
+                            <div style="background: #f8f9ff; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                                <div style="text-align: center; margin-bottom: 15px;">
+                                    <div style="font-size: 20px; font-weight: 700; color: #333;">${order.orderNo}</div>
+                                    <div style="font-size: 12px; color: #999; margin-top: 5px;">订单编号</div>
+                                </div>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 15px;">
+                                    <div style="font-size: 12px; color: #999; margin-bottom: 5px;">航班号</div>
+                                    <div style="font-size: 16px; font-weight: 600; color: #333;">${order.flightNumber || '-'}</div>
+                                </div>
+                                <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 15px;">
+                                    <div style="font-size: 12px; color: #999; margin-bottom: 5px;">舱位</div>
+                                    <div style="font-size: 16px; font-weight: 600; color: #333;">${cabinMap[order.cabinType] || order.cabinType || '经济舱'}</div>
+                                </div>
+                                <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 15px;">
+                                    <div style="font-size: 12px; color: #999; margin-bottom: 5px;">出发地</div>
+                                    <div style="font-size: 16px; font-weight: 600; color: #333;">${order.departureCity || '-'}</div>
+                                </div>
+                                <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 15px;">
+                                    <div style="font-size: 12px; color: #999; margin-bottom: 5px;">目的地</div>
+                                    <div style="font-size: 16px; font-weight: 600; color: #333;">${order.destinationCity || '-'}</div>
+                                </div>
+                                
+                                <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 15px;">
+                                    <div style="font-size: 12px; color: #999; margin-bottom: 5px;">出发时间</div>
+                                    <div style="font-size: 14px; color: #666; margin-bottom: 2px;">${order.departureDate || '-'}</div>
+                                    <div style="font-size: 16px; font-weight: 600; color: #333;">${formatTime(order.departureTime)}</div>
+                                </div>
+                                <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 15px;">
+                                    <div style="font-size: 12px; color: #999; margin-bottom: 5px;">到达时间</div>
+                                    <div style="font-size: 14px; color: #666; margin-bottom: 2px;">${getArrivalDate(order.arrivalTime, order.departureDate)}</div>
+                                    <div style="font-size: 16px; font-weight: 600; color: #333;">${formatTime(order.arrivalTime)}</div>
+                                </div>
+                                <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 15px;">
+                                    <div style="font-size: 12px; color: #999; margin-bottom: 5px;">订单状态</div>
+                                    <div style="font-size: 16px; font-weight: 600; color: ${order.status === 2 ? '#4caf50' : order.status === 4 ? '#f44336' : '#666'};">${statusMap[order.status] || '未知'}</div>
+                                </div>
+                                <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 15px;">
+                                    <div style="font-size: 12px; color: #999; margin-bottom: 5px;">购买者</div>
+                                    <div style="font-size: 16px; font-weight: 600; color: #333;">${order.buyerUsername || '-'}</div>
+                                </div>
+                            </div>
+                            
+                            <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 15px; margin-top: 15px;">
+                                <div style="font-size: 14px; font-weight: 600; color: #333; margin-bottom: 10px;">乘客信息</div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="color: #666;">姓名</span>
+                                    <span style="font-weight: 500;">${order.passengerName || '-'}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="color: #666;">身份证号</span>
+                                    <span style="font-weight: 500;">${order.passengerId || '-'}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: #666;">联系电话</span>
+                                    <span style="font-weight: 500;">${order.passengerPhone || '-'}</span>
+                                </div>
+                            </div>
+                            
+                            <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 10px; padding: 15px; margin-top: 15px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="color: #666;">票价</span>
+                                    <span>¥${order.price || 0}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="color: #666;">手续费</span>
+                                    <span>¥${order.serviceFee || 20}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-weight: 700; color: #e53935; font-size: 18px;">
+                                    <span>订单总价</span>
+                                    <span>¥${order.totalPrice || 0}</span>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #e0e0e0;">
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; color: #999;">
+                                    <span>创建时间: ${order.createdAt || '-'}</span>
+                                    <span>购买者: ${order.buyerUsername || '-'}</span>
+                                </div>
+                            </div>
+                        `;
+                        
+                        document.getElementById('viewOrderBody').innerHTML = detailHTML;
+                        document.getElementById('viewOrderModal').style.display = 'flex';
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        alert('获取订单详情失败: ' + result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('获取订单详情失败:', error);
+                    alert('获取订单详情失败');
+                });
+        }
+        
+        // 关闭订单详情弹窗
+        function closeViewOrderModal() {
+            document.getElementById('viewOrderModal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        
+        // 格式化时间显示
+        function formatTime(timeStr) {
+            if (!timeStr) return '-';
+            // 如果是完整的日期时间字符串（包含T和Z）
+            if (timeStr.includes('T')) {
+                const date = new Date(timeStr);
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                const seconds = String(date.getSeconds()).padStart(2, '0');
+                return `${hours}:${minutes}:${seconds}`;
+            }
+            // 如果已经是时间格式
+            return timeStr;
+        }
+        
+        // 获取到达日期
+        function getArrivalDate(arrivalTime, departureDate) {
+            if (!arrivalTime) return '-';
+            if (!departureDate) return '-';
+            
+            // 如果是完整的日期时间字符串，提取日期
+            if (arrivalTime.includes('T')) {
+                return arrivalTime.split('T')[0];
+            }
+            
+            // 默认使用出发日期
+            return departureDate;
+        }
+        
+        // ========== 删除订单功能 ==========
+        let deletingOrderId = null;
+        
+        // 删除订单（管理员端）- 显示确认弹窗
+        function deleteOrderAdmin(orderId) {
+            deletingOrderId = orderId;
+            document.getElementById('deleteOrderModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // 关闭删除确认弹窗
+        function closeDeleteOrderModal() {
+            document.getElementById('deleteOrderModal').style.display = 'none';
+            document.body.style.overflow = '';
+            deletingOrderId = null;
+        }
+        
+        // 确认删除订单
+        function confirmDeleteOrder() {
+            if (!deletingOrderId) return;
+            
+            const btn = document.querySelector('.btn-delete');
+            const originalText = btn.textContent;
+            btn.textContent = '删除中...';
+            btn.disabled = true;
+            
+            fetch(`http://localhost:8080/flight-booking/api/admin/orders/delete/${deletingOrderId}`, {
+                method: 'DELETE'
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    alert('删除成功');
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                    closeDeleteOrderModal();
+                    loadOrders();
+                } else {
+                    alert('删除失败: ' + result.message);
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('删除订单失败:', error);
+                alert('删除订单失败');
+                btn.textContent = originalText;
+                btn.disabled = false;
+            });
+        }
+        
+        // 禁用浏览器默认的滚动恢复行为
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        
+        // 页面刷新前保存状态
+        window.addEventListener('beforeunload', function() {
+            // 保存滚动位置
+            sessionStorage.setItem('adminScrollTop', window.scrollY.toString());
+        });
+        
+        // 页面可见性变化时保存状态
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                sessionStorage.setItem('adminScrollTop', window.scrollY.toString());
+            }
+        });
+        
+        // 恢复滚动位置（无动画）
+        function restoreScrollPosition() {
+            const scrollTop = sessionStorage.getItem('adminScrollTop');
+            if (scrollTop && parseInt(scrollTop) > 0) {
+                // 使用 window.scrollTo 的简单形式，确保无动画
+                window.scrollTo(0, parseInt(scrollTop));
+            }
+        }
+        
+        // 延迟恢复滚动位置（等待数据加载完成）
+        function scheduleRestoreScroll() {
+            requestAnimationFrame(function() {
+                restoreScrollPosition();
+            });
+        }
+        
+        // 在页面加载的最早时机恢复滚动位置
+        document.addEventListener('DOMContentLoaded', function() {
+            // 立即恢复滚动位置
+            restoreScrollPosition();
+            
+            loadStats();
+            
+            // 恢复上次选中的标签页
+            const savedTab = localStorage.getItem('adminActiveTab') || 'flights';
+            const tabButtons = document.querySelectorAll('.nav-tabs button');
+            tabButtons.forEach(btn => {
+                if (btn.textContent.includes(getTabName(savedTab))) {
+                    btn.click();
+                }
+            });
+        });
+        
+        // 获取标签名称（用于匹配按钮文本）
+        function getTabName(tabName) {
+            const tabMap = {
+                'flights': '航班管理',
+                'booking': '机票预订',
+                'orders': '订单管理',
+                'users': '用户管理',
+                'admins': '管理员管理'
+            };
+            return tabMap[tabName] || '航班管理';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /flight-booking
+
+spring:
+  application:
+    name: flight-booking-system
+  
+  datasource:
+    url: jdbc:mysql://localhost:3306/flight_booking_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8
+    username: root
+    password: xkp051019
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQLDialect
+    defer-datasource-initialization: true
+    properties:
+      hibernate:
+          '[format_sql]': true
+          dialect: org.hibernate.dialect.MySQLDialect
+          '[hbm2ddl.auto]': update
+  # jackson:
+  #   date-format: yyyy-MM-dd HH:mm:ss
+  #   time-zone: Asia/Shanghai
+
+logging:
+  level:
+    '[com.flightbooking]': DEBUG

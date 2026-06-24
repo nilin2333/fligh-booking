@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>机票预订系统 - 忘记密码</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHe', 'PingFang SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .reset-container {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px RGBA(0, 0, 0, 0.3);
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 36px;
+            color: #fff;
+        }
+
+        .logo-section h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .logo-section p {
+            font-size: 14px;
+            color: #999;
+        }
+
+        /* 步骤指示器 */
+        .steps {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .steps::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 25%;
+            right: 25%;
+            height: 2px;
+            background: #e0e0e0;
+        }
+
+        .step {
+            position: relative;
+            text-align: center;
+            flex: 1;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            color: #999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .step.active .step-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+
+        .step.active ~ .step::before {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .step-label {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .step.active .step-label {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: #fff;
+            box-shadow: 0 0 0 3px RGBA(102, 126, 234, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: #ccc;
+        }
+
+        .form-group .error {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .form-group.error input {
+            border-color: #e74c3c;
+        }
+
+        .form-group.error .error {
+            display: block;
+        }
+
+        /* 验证码输入框 */
+        .captcha-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .captcha-group .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .captcha-btn {
+            padding: 14px 20px;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            background: #fff;
+            color: #667eea;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .captcha-btn:hover:not(:disabled) {
+            background: #667eea;
+            color: #fff;
+        }
+
+        .captcha-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 25px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px RGBA(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        /* 消息提示 */
+        .success-message {
+            display: none;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .error-message {
+            display: none;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* 链接区域 */
+        .links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .links a {
+            color: #667eea;
+            font-size: 14px;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .links a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #999;
+            font-size: 12px;
+        }
+
+        /* 步骤内容切换 */
+        .step-content {
+            display: none;
+        }
+
+        .step-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="reset-container">
+        <!-- Logo和标题区域 -->
+        <div class="logo-section">
+            <div class="logo">✈️</div>
+            <h1>忘记密码</h1>
+            <p>请按照提示步骤重置您的密码</p>
+        </div>
+
+        <!-- 步骤指示器 -->
+        <div class="steps">
+            <div class="step active" data-step="1">
+                <div class="step-number">1</div>
+                <div class="step-label">验证身份</div>
+            </div>
+            <div class="step" data-step="2">
+                <div class="step-number">2</div>
+                <div class="step-label">验证验证码</div>
+            </div>
+            <div class="step" data-step="3">
+                <div class="step-number">3</div>
+                <div class="step-label">设置新密码</div>
+            </div>
+        </div>
+
+        <!-- 消息提示 -->
+        <div class="success-message" id="successMessage"></div>
+        <div class="error-message" id="errorMessage"></div>
+
+        <!-- 步骤1：验证身份 -->
+        <div class="step-content active" id="step1">
+            <form id="step1Form">
+                <div class="form-group">
+                    <label for="email">电子邮箱</label>
+                    <input type="email" id="email" placeholder="请输入注册时的邮箱" required>
+                    <div class="error" id="emailError">邮箱格式不正确</div>
+                </div>
+
+                <button type="submit" class="submit-btn">获取验证码</button>
+            </form>
+        </div>
+
+        <!-- 步骤2：验证验证码 -->
+        <div class="step-content" id="step2">
+            <form id="step2Form">
+                <div class="captcha-group">
+                    <div class="form-group">
+                        <label for="captcha">验证码</label>
+                        <input type="text" id="captcha" placeholder="请输入验证码" required maxlength="6">
+                        <div class="error" id="captchaError">验证码错误</div>
+                    </div>
+                    <button type="button" class="captcha-btn" id="resendBtn">重新发送</button>
+                </div>
+
+                <button type="submit" class="submit-btn">下一步</button>
+            </form>
+        </div>
+
+        <!-- 步骤3：设置新密码 -->
+        <div class="step-content" id="step3">
+            <form id="step3Form">
+                <div class="form-group">
+                    <label for="newPassword">新密码</label>
+                    <input type="password" id="newPassword" placeholder="请输入新密码（至少6位，包含字母和数字）" required>
+                    <div class="error" id="newPasswordError">密码格式不正确</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">确认密码</label>
+                    <input type="password" id="confirmPassword" placeholder="请再次输入新密码" required>
+                    <div class="error" id="confirmPasswordError">两次输入的密码不一致</div>
+                </div>
+
+                <button type="submit" class="submit-btn">完成重置</button>
+            </form>
+        </div>
+
+        <!-- 链接区域 -->
+        <div class="links">
+            <a href="系统登录页.html">返回登录</a>
+            <a href="系统注册页.html">注册账号</a>
+        </div>
+
+        <!-- 页脚 -->
+        <div class="footer">
+            Copyright 2026 机票预订系统 版权所有
+        </div>
+    </div>
+
+    <script>
+        // 当前步骤
+        let currentStep = 1;
+        let email = '';
+        let captcha = '';
+
+        // 切换步骤
+        function goToStep(step) {
+            // 隐藏所有步骤内容
+            document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+            
+            // 显示目标步骤
+            document.getElementById(`step${step}`).classList.add('active');
+            
+            // 更新步骤指示器
+            document.querySelectorAll('.step').forEach((el, index) => {
+                if (index < step) {
+                    el.classList.add('active');
+                }
+            });
+            
+            currentStep = step;
+        }
+
+        // 步骤1：验证身份
+        document.getElementById('step1Form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const emailInput = document.getElementById('email');
+            email = emailInput.value;
+            
+            // 验证邮箱格式
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                document.getElementById('email').parentElement.classList.add('error');
+                return;
+            }
+            document.getElementById('email').parentElement.classList.remove('error');
+            
+            // 隐藏消息
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+            
+            // 模拟发送验证码
+            fetch('http://localhost:8080/flight-booking/api/send-captcha', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 模拟验证码
+                    captcha = '123456'; // 实际应从后端获取
+                    document.getElementById('successMessage').textContent = `验证码已发送至 ${email}（模拟验证码：${captcha}）`;
+                    document.getElementById('successMessage').style.display = 'block';
+                    
+                    // 切换到步骤2
+                    setTimeout(() => {
+                        goToStep(2);
+                        startCaptchaTimer();
+                    }, 1000);
+                } else {
+                    document.getElementById('errorMessage').textContent = data.message || '发送失败，请重试';
+                    document.getElementById('errorMessage').style.display = 'block';
+                }
+            })
+            .catch(error => {
+                document.getElementById('errorMessage').textContent = '网络错误，请稍后重试';
+                document.getElementById('errorMessage').style.display = 'block';
+            });
+        });
+
+        // 验证码倒计时
+        function startCaptchaTimer() {
+            let seconds = 60;
+            const btn = document.getElementById('resendBtn');
+            btn.disabled = true;
+            
+            const timer = setInterval(() => {
+                seconds--;
+                btn.textContent = `${seconds}s`;
+                
+                if (seconds <= 0) {
+                    clearInterval(timer);
+                    btn.textContent = '重新发送';
+                    btn.disabled = false;
+                }
+            }, 1000);
+        }
+
+        // 重新发送验证码
+        document.getElementById('resendBtn').addEventListener('click', function() {
+            // 模拟重新发送验证码
+            captcha = '654321'; // 模拟新验证码
+            document.getElementById('successMessage').textContent = `验证码已重新发送（模拟验证码：${captcha}）`;
+            document.getElementById('successMessage').style.display = 'block';
+            startCaptchaTimer();
+        });
+
+        // 步骤2：验证验证码
+        document.getElementById('step2Form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const inputCaptcha = document.getElementById('captcha').value;
+            
+            // 验证验证码
+            if (!inputCaptcha || inputCaptcha !== captcha) {
+                document.getElementById('captcha').parentElement.classList.add('error');
+                document.getElementById('captchaError').textContent = '验证码错误';
+                return;
+            }
+            document.getElementById('captcha').parentElement.classList.remove('error');
+            
+            // 切换到步骤3
+            goToStep(3);
+        });
+
+        // 步骤3：设置新密码
+        document.getElementById('step3Form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // 验证密码
+            let isValid = true;
+            
+            if (!/(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}/.test(newPassword)) {
+                document.getElementById('newPassword').parentElement.classList.add('error');
+                document.getElementById('newPasswordError').textContent = '密码至少6位，需包含字母和数字';
+                isValid = false;
+            } else {
+                document.getElementById('newPassword').parentElement.classList.remove('error');
+            }
+            
+            if (newPassword !== confirmPassword) {
+                document.getElementById('confirmPassword').parentElement.classList.add('error');
+                isValid = false;
+            } else {
+                document.getElementById('confirmPassword').parentElement.classList.remove('error');
+            }
+            
+            if (!isValid) return;
+            
+            // 隐藏消息
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+            
+            // 提交重置密码请求
+            fetch('http://localhost:8080/flight-booking/api/reset-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, newPassword })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('successMessage').textContent = '密码重置成功！即将跳转到登录页面...';
+                    document.getElementById('successMessage').style.display = 'block';
+                    
+                    setTimeout(() => {
+                        window.location.href = '系统登录页.html';
+                    }, 3000);
+                } else {
+                    document.getElementById('errorMessage').textContent = data.message || '重置失败，请重试';
+                    document.getElementById('errorMessage').style.display = 'block';
+                }
+            })
+            .catch(error => {
+                document.getElementById('errorMessage').textContent = '网络错误，请稍后重试';
+                document.getElementById('errorMessage').style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>

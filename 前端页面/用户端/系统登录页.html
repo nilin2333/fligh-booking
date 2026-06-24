@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>机票预订系统 - 登录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHe', 'PingFang SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px RGBA(0, 0, 0, 0.3);
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 36px;
+            color: #fff;
+        }
+
+        .logo-section h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .logo-section p {
+            font-size: 14px;
+            color: #999;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: #fff;
+            box-shadow: 0 0 0 3px RGBA(102, 126, 234, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: #ccc;
+        }
+
+        .forgot-password {
+            text-align: right;
+            margin-bottom: 25px;
+        }
+
+        .forgot-password a {
+            color: #667eea;
+            font-size: 14px;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px RGBA(102, 126, 234, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .divider {
+            position: relative;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e0e0e0;
+        }
+
+        .divider span {
+            position: relative;
+            background: #fff;
+            padding: 0 20px;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .social-login {
+            display: flex;
+            gap: 12px;
+        }
+
+        .social-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .social-btn:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .social-btn i {
+            font-size: 18px;
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .register-link p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .register-link a {
+            color: #667eea;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #999;
+            font-size: 12px;
+        }
+
+        .success-message {
+            display: none;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .error-message {
+            display: none;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <!-- Logo和标题区域 -->
+        <div class="logo-section">
+            <div class="logo">✈️</div>
+            <h1>机票预订系统</h1>
+            <p>轻松预订，快乐出行</p>
+        </div>
+
+        <!-- 消息提示 -->
+        <div class="success-message" id="successMessage">登录成功！即将跳转到首页...</div>
+        <div class="error-message" id="errorMessage"></div>
+
+        <!-- 登录表单 -->
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" id="username" placeholder="请输入用户名或邮箱" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" placeholder="请输入密码" required>
+            </div>
+
+            <div class="forgot-password">
+                <a href="系统忘记密码页.html">忘记密码？</a>
+            </div>
+
+            <button type="submit" class="login-btn">登 录</button>
+        </form>
+
+        <!-- 分隔线 -->
+        <div class="divider">
+            <span>或使用以下方式登录</span>
+        </div>
+
+        <!-- 社交登录 -->
+        <div class="social-login">
+            <button class="social-btn">
+                <i>📱</i> 手机验证码
+            </button>
+            <button class="social-btn">
+                <i>🐧</i> QQ登录
+            </button>
+        </div>
+
+        <!-- 注册链接 -->
+        <div class="register-link">
+            <p>还没有账号？<a href="系统注册页.html">立即注册</a></p>
+        </div>
+
+        <!-- 页脚 -->
+        <div class="footer">
+            机票预订系统
+        </div>
+    </div>
+
+    <script>
+        // 登录表单处理
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // 隐藏消息
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                document.getElementById('errorMessage').textContent = '请填写完整的登录信息';
+                document.getElementById('errorMessage').style.display = 'block';
+                return;
+            }
+            
+            // 调用后端API
+            fetch('http://localhost:8080/flight-booking/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 使用sessionStorage存储用户信息，确保每个标签页有独立的会话
+                    // 清除旧的用户信息
+                    sessionStorage.removeItem('userId');
+                    sessionStorage.removeItem('username');
+                    localStorage.removeItem('userId');
+                    localStorage.removeItem('username');
+                    
+                    // 存储用户信息到sessionStorage（每个标签页独立）
+                    sessionStorage.setItem('username', username);
+                    // 尝试从多个可能的字段获取用户ID，确保兼容性
+                    let userId = 1;
+                    if (data.data) {
+                        if (data.data.userId) {
+                            userId = data.data.userId;
+                        } else if (data.data.id) {
+                            userId = data.data.id;
+                        } else if (data.data.userid) {
+                            userId = data.data.userid;
+                        }
+                    }
+                    sessionStorage.setItem('userId', userId.toString());
+                    console.log('登录成功，用户名:', username, '，用户ID:', userId); // 调试日志
+                    document.getElementById('successMessage').style.display = 'block';
+                    setTimeout(() => {
+                        // 登录成功后传递用户名到首页
+                        window.location.href = '系统首页.html?username=' + encodeURIComponent(username);
+                    }, 2000);
+                } else {
+                    document.getElementById('errorMessage').textContent = data.Message || '登录失败';
+                    document.getElementById('errorMessage').style.display = 'block';
+                }
+            })
+            .catch(error => {
+                document.getElementById('errorMessage').textContent = '网络错误，请稍后重试';
+                document.getElementById('errorMessage').style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>

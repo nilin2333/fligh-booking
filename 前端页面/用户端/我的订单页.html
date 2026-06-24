@@ -1,0 +1,3080 @@
+<!-- 我的订单页.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的订单 - 机票预订系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 样式代码 */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Microsoft YaHe', 'PingFang SC', sans-serif; background: #f5f7fa; min-height: 100vh; }
+        
+        /* 导航栏样式 */
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px 0;
+            box-shadow: 0 2px 10px RGBA(0,0,0,0.1);
+            position: sticky; top: 0; z-index: 100;
+        }
+        /* 导航栏容器样式 */
+        .nav-container {
+            max-width: 1200px; margin: 0 auto;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px;
+        }
+        /* 导航栏logo样式 */
+        .logo { display: flex; align-items: center; color: #fff; font-size: 24px; font-weight: 600; }
+        .logo i { margin-right: 10px; font-size: 32px; }
+        /* 导航栏链接样式 */
+        .nav-links { display: flex; list-style: none; }
+        .nav-links li { margin-left: 30px; }
+        .nav-links a { color: #fff; text-decoration: none; font-size: 15px; transition: opacity 0.3s; position: relative; }
+        .nav-links a .badge { position: absolute; top: -8px; right: -12px; background: #ff4757; color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 10px; min-width: 18px; text-align: center; }
+        .nav-links a:hover { opacity: 0.8; }
+        .nav-links a.active { border-bottom: 2px solid #fff; padding-bottom: 3px; }
+        /* 导航栏用户信息样式 */
+        .user-info { display: flex; align-items: center; color: #fff; }
+        .user-info span { margin-right: 15px; }
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        .user-avatar:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        .user-avatar i {
+            font-size: 18px;
+            color: #fff;
+        }
+        .user-dropdown {
+            position: relative;
+        }
+        .user-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 180px;
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .user-dropdown-menu.show {
+            display: block;
+            animation: dropdownFade 0.2s ease;
+        }
+        @keyframes dropdownFade {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .user-dropdown-menu::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            right: 15px;
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            transform: rotate(45deg);
+            box-shadow: -2px -2px 4px rgba(0,0,0,0.05);
+        }
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #333;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+        .dropdown-item:hover {
+            background: #f5f7fa;
+            color: #667eea;
+        }
+        .dropdown-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+            color: #667eea;
+        }
+        .dropdown-divider {
+            height: 1px;
+            background: #eee;
+            margin: 0;
+        }
+        .profile-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            pointer-events: none;
+        }
+        .profile-modal-overlay.show {
+            display: flex;
+            animation: fadeIn 0.2s ease;
+            pointer-events: auto;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .profile-modal {
+            background: #fff;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .profile-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .profile-modal-header h3 {
+            font-size: 22px;
+            color: #333;
+            margin: 0;
+        }
+        .profile-close-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #f5f5f5;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            color: #666;
+            transition: all 0.2s;
+        }
+        .profile-close-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+        .profile-info-list {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .profile-info-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+        .profile-info-item:hover {
+            background: #f0f4ff;
+        }
+        .profile-info-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        .profile-info-icon i {
+            font-size: 18px;
+            color: #fff;
+        }
+        .profile-info-content {
+            flex: 1;
+        }
+        .profile-info-label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 4px;
+        }
+        .profile-info-value {
+            font-size: 15px;
+            color: #333;
+            font-weight: 500;
+        }
+        .profile-edit-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #fff;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+        .profile-edit-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .confirm-modal {
+            background: #fff;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: modalSlideUp 0.3s ease;
+            text-align: center;
+            position: relative;
+            z-index: 10002;
+        }
+        .confirm-modal-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 28px;
+            color: #fff;
+        }
+        .confirm-modal h3 {
+            margin: 0 0 10px;
+            font-size: 20px;
+            color: #333;
+        }
+        .confirm-modal p {
+            margin: 0 0 25px;
+            color: #666;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        .confirm-modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        .confirm-modal-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+        .confirm-modal-btn.cancel {
+            background: #f5f5f5;
+            color: #666;
+        }
+        .confirm-modal-btn.cancel:hover {
+            background: #e0e0e0;
+        }
+        .confirm-modal-btn.danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: #fff;
+        }
+        .confirm-modal-btn.danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+        }
+        .success-modal {
+            background: #fff;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: modalSlideUp 0.3s ease;
+            text-align: center;
+            position: relative;
+            z-index: 10002;
+        }
+        .success-modal-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 28px;
+            color: #fff;
+        }
+        .success-modal h3 {
+            margin: 0 0 10px;
+            font-size: 20px;
+            color: #333;
+        }
+        .success-modal p {
+            margin: 0 0 25px;
+            color: #666;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        .success-modal-btn {
+            padding: 12px 40px;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            color: #fff;
+            transition: all 0.2s;
+        }
+        .success-modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .logout-btn {
+            background: RGBA(255,255,255,0.2); border: none; color: #fff;
+            padding: 8px 16px; border-radius: 20px; cursor: pointer;
+            font-size: 14px; transition: background 0.3s;
+        }
+        .logout-btn:hover { background: RGBA(255,255,255,0.3); }
+        /* 订单部分样式 */
+        .order-section { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .order-header-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .section-title { font-size: 24px; font-weight: 600; color: #333; margin: 0; }
+        .refresh-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .refresh-btn:active {
+            transform: translateY(0);
+        }
+        .refresh-btn.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        .refresh-btn.loading i {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .order-tabs { display: flex; gap: 20px; margin-bottom: 30px; }
+        .tab-btn {
+            background: #fff; border: 2px solid #e0e0e0;
+            padding: 10px 25px; border-radius: 25px;
+            cursor: pointer; font-size: 15px;
+            transition: all 0.3s;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff; border-color: #667eea;
+        }
+        .tab-btn:hover { border-color: #667eea; }
+
+        .orders-container { display: flex; flex-direction: column; gap: 20px; }
+
+        .order-card {
+            background: #fff; border-radius: 12px; padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .order-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee;
+        }
+
+        .order-id { font-size: 14px; color: #666; }
+        .order-status {
+            padding: 5px 15px; border-radius: 20px; font-size: 14px;
+        }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-confirmed { background: #d4edda; color: #155724; }
+        .status-completed { background: #e7f3ff; color: #0c63e4; }
+        .status-canceled { background: #f8d7da; color: #721c24; }
+        .status-expired { background: #f3e8ff; color: #6b21a8; }
+
+        .order-content {
+            display: flex; gap: 30px;
+        }
+        
+        /* 航班信息样式 */
+        .flight-info { flex: 1; }
+        .route-info { display: flex; align-items: center; gap: 20px; margin-bottom: 15px; }
+        .city-box { text-align: center; min-width: 100px; }
+        .city-name { font-size: 18px; font-weight: 600; color: #333; }
+        .city-code { font-size: 12px; color: #999; }
+        .route-arrow { font-size: 24px; color: #667eea; }
+        .flight-details { display: flex; gap: 30px; color: #666; font-size: 14px; }
+        .flight-number { font-weight: 600; color: #333; }
+        
+        /* 乘客信息样式 */
+        .passenger-info { width: 200px; }
+        .passenger-info h4 { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 10px; }
+        .passenger-name { font-size: 14px; color: #666; margin-bottom: 5px; }
+        .seat-number { font-size: 14px; color: #666; }
+        
+        /* 价格信息样式 */
+        .price-info { text-align: right; }
+        .total-price { font-size: 24px; font-weight: 700; color: #e74c3c; }
+        .price-label { font-size: 12px; color: #999; }
+        
+
+
+        /* -----订单页按钮样式----- */
+
+        /* 操作按钮样式 */
+        .order-actions {
+            display: flex; justify-content: flex-end; gap: 10px;
+            margin-top: 20px;
+            padding-top: 15px; border-top: 1px solid #eee;
+        }
+        .action-btn {
+            padding: 10px 20px; border-radius: 8px;
+            font-size: 14px; font-weight: 500;
+            cursor: pointer; border: none;
+            transition: all 0.3s;
+        }
+
+        /* 继续支付按钮样式 */
+        .action-btn.btn-pay {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+        .action-btn.btn-pay:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        .action-btn.btn-pay:active {
+            transform: translateY(0);
+        }
+
+        /* 改签日期选择按钮样式 */
+        .date-option {
+            width: 70px;
+            padding: 12px 8px;
+            border: none;
+            border-radius: 10px;
+            background: #f5f5f5;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        .date-option:hover {
+            background: #e8e8e8;
+            transform: translateY(-2px);
+        }
+        .date-option:active {
+            transform: translateY(0);
+        }
+
+        /* 取消订单按钮 */
+        .btn-cancel {
+            background: #f5f7fa; color: #666;
+        }
+        .btn-cancel:hover { background: #e0e0e0; }
+        
+        /* 取消订单按钮 */
+        .btn-cancel { background: #f5f7fa; color: #666; }
+        .btn-cancel:hover { background: #e0e0e0; }
+        .btn-save {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+        .btn-save:hover { transform: translateY(-2px); box-shadow: 0 8px 20px RGBA(102,126,234,0.4); }
+
+        /* 订单详情按钮 */
+        .btn-detail {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+        .btn-detail:hover { transform: translateY(-2px); box-shadow: 0 5px 15px RGBA(102,126,234,0.4); }
+        
+        /* 删除订单按钮 */
+        .btn-delete {
+            background: #ffebee; color: #e53935;
+        }
+        .btn-delete:hover { background: #ffcdd2; }
+        
+        /* 无订单提示 */
+        .no-orders { text-align: center; padding: 80px 20px; }
+        .no-orders-icon { font-size: 64px; margin-bottom: 20px; opacity: 0.5; }
+        .no-orders-title { font-size: 20px; font-weight: 600; color: #333; margin-bottom: 10px; }
+        .no-orders-desc { color: #666; font-size: 14px; }
+        .no-orders-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff; text-decoration: none;
+            border-radius: 25px; font-weight: 600;
+            transition: all 0.3s;
+        }
+        .no-orders-link:hover { transform: translateY(-2px); box-shadow: 0 8px 20px RGBA(102,126,234,0.4); }
+        
+        
+        /* -----模态框样式----- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: RGBA(0,0,0,0.6);
+            display: none; align-items: center; justify-content: center;
+            z-index: 1000; padding: 20px;
+        }
+        .modal-content {
+            background: #fff; border-radius: 16px;
+            max-width: 500px; width: 100%;
+            box-shadow: 0 20px 60px RGBA(0,0,0,0.3);
+        }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 25px; border-bottom: 1px solid #eee;
+        }
+        .modal-header h3 { font-size: 18px; font-weight: 600; color: #333; }
+        .close-btn {
+            background: none; border: none; font-size: 28px;
+            color: #999; cursor: pointer; line-height: 1;
+        }
+        .close-btn:hover { color: #333; }
+        .modal-body { padding: 25px; }
+        .modal-body p { color: #666; font-size: 14px; line-height: 1.6; margin-bottom: 10px; }
+        
+        .modal-footer { display: flex; gap: 15px; padding: 20px 25px; border-top: 1px solid #eee; }
+        .modal-footer button {
+            flex: 1; padding: 12px; border-radius: 10px;
+            font-size: 15px; font-weight: 600; cursor: pointer;
+            border: none; transition: all 0.3s;
+        }
+
+        /* 订单详情弹窗样式 */
+        #orderDetailModal .modal-body {
+            padding: 25px;
+        }
+        
+        .order-detail-section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #e0e0e0;
+        }
+        
+        .order-detail-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .order-detail-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .order-detail-title::before {
+            content: '';
+            width: 4px;
+            height: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+        
+        .order-detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .order-detail-row:last-child {
+            border-bottom: none;
+        }
+        
+        .order-detail-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .order-detail-value {
+            color: #333;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: right;
+        }
+        
+        .order-detail-value.highlight {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .order-detail-value.success {
+            color: #27ae60;
+        }
+        
+        .order-detail-value.warning {
+            color: #f39c12;
+        }
+        
+        .order-detail-value.danger {
+            color: #e74c3c;
+        }
+        
+        /* 航班日期样式 */
+        .flight-date {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 4px;
+        }
+
+
+        /* 航班信息卡片 */
+        .flight-info-card {
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .flight-route {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .flight-city {
+            text-align: center;
+        }
+        
+        .flight-city-code {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .flight-city-name {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .flight-arrow {
+            font-size: 20px;
+            color: #667eea;
+        }
+        
+        .flight-duration {
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+        }
+        
+        .flight-time {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* 日期显示样式 */
+        .city-date {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 4px;
+        }
+
+        /* -----按钮样式----- */
+        
+        /* 改签按钮样式 */
+        .action-btn.btn-change {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: #fff;
+        }
+        .action-btn.btn-change:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(243, 156, 18, 0.4);
+        }
+        .action-btn.btn-change:active {
+            transform: translateY(0);
+        }        
+
+
+        /* 取消订单按钮样式 */
+        .btn-cancel-order {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+            background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
+            color: #fff;
+        }
+        .btn-cancel-order:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px RGBA(229,57,53,0.4);
+        }
+        .btn-cancel-order:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+
+        /* 订单取消成功按钮样式 */
+        .btn-confirm-success {
+            padding: 12px 40px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+        .btn-confirm-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px RGBA(102,126,234,0.4);
+        }
+
+
+        /* 删除模态框按钮样式 */
+        .btn-delete-modal {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+            background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
+            color: #fff;
+        }
+        .btn-delete-modal:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px RGBA(229,57,53,0.4);
+        }
+        .btn-delete-modal:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+    /* 改签页相关样式 */
+        /* 航班选项样式 */
+        .flight-option {
+            position: relative;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        .flight-option:hover {
+            border-color: #667eea;
+            background: #fafbfc;
+        }
+        
+        /* 航班选项选中状态 */
+        .flight-option.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8efff 100%);
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);
+        }
+        
+        /* 选中标记样式 */
+        .flight-radio {
+            position: absolute;
+            top: 50%;          /* 垂直居中 */
+            right: 15px;
+            transform: translateY(-50%); /* 垂直居中 */
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #e8e8e8;
+            color: transparent;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            border: 2px solid #e0e0e0; /* 添加边框 */
+            z-index: 10; /* 确保在最上层 */
+        }
+        
+        /* 选中标记选中状态 */
+        .flight-option.selected .flight-radio {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            transform: scale(1.1);
+        }
+
+
+
+        /* -----页脚样式----- */
+        footer {
+            background: #333; color: #fff; padding: 50px 20px;
+            margin-top: 50px;
+        }
+        .footer-content {
+            max-width: 1200px; margin: 0 auto;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+        .footer-section h3 { font-size: 18px; margin-bottom: 20px; font-weight: 600; }
+        .footer-section ul { list-style: none; }
+        .footer-section li { margin-bottom: 10px; }
+        .footer-section a { color: #999; text-decoration: none; font-size: 14px; transition: color 0.3s; }
+        .footer-section a:hover { color: #fff; }
+        /* 页脚底部样式 */
+        .footer-bottom {
+            text-align: center; padding-top: 30px;
+            border-top: 1px solid #444; color: #666;
+            font-size: 13px; margin-top: 30px;
+        }
+
+        /* -----响应式布局----- */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .order-content { flex-direction: column; }
+            .route-info { flex-wrap: wrap; }
+            .flight-details { flex-wrap: wrap; gap: 10px; }
+            .order-actions { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <header>
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-plane"></i>
+                <span>机票预订系统</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="系统首页.html">首页</a></li>
+                <li><a href="机票查询页.html">机票查询</a></li>
+                <li><a href="我的订单页.html" class="active">我的订单</a></li>
+                <li><a href="乘客管理页.html">乘客管理</a></li>
+                <li><a href="消息中心页.html" id="messageLink">消息中心<span id="messageBadge" class="badge" style="display: none;">0</span></a></li>
+                <li><a href="帮助中心页.html">帮助中心</a></li>
+            </ul>
+            <div class="user-info">
+                <div class="user-dropdown">
+                    <div class="user-avatar" id="userAvatar" onclick="toggleUserMenu()">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-dropdown-menu" id="userDropdownMenu">
+                        <button class="dropdown-item" onclick="showProfile()">
+                            <i class="fas fa-user-circle"></i>个人信息
+                        </button>
+                        <button class="dropdown-item" onclick="showAccountManagement()">
+                            <i class="fas fa-cog"></i>账号管理
+                        </button>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item" onclick="showHelpCenter()">
+                            <i class="fas fa-question-circle"></i>帮助中心
+                        </button>
+                    </div>
+                </div>
+                <span>欢迎, <span id="username">用户</span></span>
+                <button class="logout-btn" onclick="logout()">退出登录</button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- 订单列表 -->
+    <section class="order-section">
+        <div class="order-header-wrapper">
+            <h2 class="section-title">📋 我的订单</h2>
+            <button class="refresh-btn" onclick="refreshOrders()" id="refreshBtn" title="刷新订单列表">
+                <i class="fas fa-sync-alt"></i> 刷新
+            </button>
+        </div>
+        <div class="order-tabs">
+            <button class="tab-btn active" onclick="filterOrders('all')">全部订单</button>
+            <button class="tab-btn" onclick="filterOrders('pending')">待支付</button>
+            <button class="tab-btn" onclick="filterOrders('confirmed')">已支付</button>
+            <button class="tab-btn" onclick="filterOrders('completed')">已完成</button>
+            <button class="tab-btn" onclick="filterOrders('canceled')">已取消</button>
+            <button class="tab-btn" onclick="filterOrders('expired')">已过期</button>
+        </div>
+        <div class="orders-container" id="ordersContainer"></div>
+    </section>
+
+
+    <!-- 支付弹窗 -->
+    <div class="modal-overlay" id="paymentModal">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3>继续支付</h3>
+                <button class="close-btn" onclick="closePaymentModal()">×</button>
+            </div>
+            <div class="modal-body" id="paymentModalBody">
+                <!-- 内容动态生成 -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closePaymentModal()">取消</button>
+                <button class="btn-confirm" onclick="submitPayment()" disabled>确认支付</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 支付成功弹窗 -->
+    <div class="modal-overlay" id="paymentSuccessModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-body" style="text-align: center; padding: 40px 25px;">
+                <div style="font-size: 64px; margin-bottom: 20px;">✅</div>
+                <h3 style="color: #333; font-size: 20px; margin-bottom: 15px;">支付成功</h3>
+                <p style="color: #666; font-size: 14px; line-height: 1.6;">
+                    您的订单已支付成功，订单状态已更新为"已支付"。
+                </p>
+                <p style="color: #999; font-size: 13px; margin-top: 10px;">
+                    请按时前往机场办理登机手续。
+                </p>
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <button class="btn-confirm-success" onclick="closePaymentSuccessModal()">确定</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 订单详情弹窗 -->
+    <div class="modal-overlay" id="orderDetailModal">
+        <div class="modal-content" style="max-width: 550px; max-height: 85vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3>订单详情</h3>
+                <button class="close-btn" onclick="closeOrderDetailModal()">×</button>
+            </div>
+            <div class="modal-body" id="orderDetailBody" style="padding: 25px;">
+                <!-- 订单详情内容将在这里动态生成 -->
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <button class="btn-confirm" onclick="closeOrderDetailModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 改签弹窗 -->
+    <div class="modal-overlay" id="changeFlightModal">
+        <div class="modal-content" style="max-width: 700px; max-height: 85vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3>机票改签</h3>
+                <button class="close-btn" onclick="closeChangeFlightModal()">×</button>
+            </div>
+            <div class="modal-body" id="changeFlightBody" style="padding: 25px;">
+                <!-- 改签内容将在这里动态生成 -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeChangeFlightModal()">取消</button>
+                <button class="btn-confirm" id="confirmChangeBtn" onclick="confirmChangeFlight()" disabled>确认改签</button>
+            </div>
+        </div>
+    </div>
+    
+
+    
+    <!-- 改签成功弹窗 -->
+    <div class="modal-overlay" id="changeSuccessModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-body" style="text-align: center; padding: 40px 25px;">
+                <div style="font-size: 64px; margin-bottom: 20px;">✈️</div>
+                <h3 style="color: #333; font-size: 20px; margin-bottom: 15px;">改签成功</h3>
+                <p style="color: #666; font-size: 14px; line-height: 1.6;">
+                    您的机票已成功改签，新的航班信息已更新。
+                </p>
+                <p style="color: #999; font-size: 13px; margin-top: 10px;">
+                    请按时前往机场办理登机手续。
+                </p>
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <button class="btn-confirm-success" onclick="closeChangeSuccessModal()">确定</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 取消确认模态框 -->
+    <div class="modal-overlay" id="cancelModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>取消订单确认</h3>
+                <button class="close-btn" onclick="closeCancelModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="font-size: 48px; margin-bottom: 15px;">⚠️</div>
+                    <h4 style="color: #333; font-size: 16px; margin-bottom: 10px;">确定要取消此订单吗？</h4>
+                    <p style="color: #666; font-size: 14px; line-height: 1.6;">
+                        取消订单后，订单状态将变为已取消，您可以随时删除此订单记录。
+                    </p>
+                </div>
+                <div id="cancelOrderInfo" style="margin-top: 15px; padding: 15px; background: #fff3cd; border-radius: 8px; border: 1px solid #ffeeba;">
+                    <!-- 订单信息将在这里显示 -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeCancelModal()">取消</button>
+                <button class="btn-cancel-order" onclick="confirmCancelOrder()">确认取消</button>
+            </div>
+        </div>
+    </div>
+    <!-- 订单取消成功弹窗 -->
+    <div class="modal-overlay" id="cancelSuccessModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-body" style="text-align: center; padding: 40px 25px;">
+                <div style="font-size: 64px; margin-bottom: 20px;">✅</div>
+                <h3 style="color: #333; font-size: 20px; margin-bottom: 15px;">订单已取消</h3>
+                <p style="color: #666; font-size: 14px; line-height: 1.6;">
+                    您的订单已成功取消，订单状态已更新为"已取消"。
+                </p>
+                <p style="color: #999; font-size: 13px; margin-top: 10px;">
+                    您可以在"已取消"标签页中查看或删除此订单记录。
+                </p>
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <button class="btn-confirm-success" onclick="closeCancelSuccessModal()">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>删除订单记录</h3>
+                <button class="close-btn" onclick="closeDeleteModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="font-size: 48px; margin-bottom: 15px;">🗑️</div>
+                    <p style="color: #666; font-size: 14px; line-height: 1.6;">
+                        删除订单记录后，将无法恢复此订单的任何信息。
+                    </p>
+                    <p style="color: #e53935; font-size: 14px; font-weight: 500; margin-top: 10px;">
+                        此操作不可逆，请谨慎操作！
+                    </p>
+                </div>
+                <div id="deleteOrderInfo" style="margin-top: 15px; padding: 15px; background: #fff3cd; border-radius: 8px; border: 1px solid #ffeeba;">
+                    <!-- 订单信息将在这里显示 -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeDeleteModal()">取消</button>
+                <button class="btn-delete-modal" onclick="confirmDeleteOrder()">确认删除</button>
+            </div>
+        </div>
+    </div>
+    <!-- 删除成功弹窗 -->
+    <div class="modal-overlay" id="deleteSuccessModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-body" style="text-align: center; padding: 40px 25px;">
+                <div style="font-size: 64px; margin-bottom: 20px;">🗑️</div>
+                <h3 style="color: #333; font-size: 20px; margin-bottom: 15px;">订单记录已删除</h3>
+                <p style="color: #666; font-size: 14px; line-height: 1.6;">
+                    您的订单记录已成功删除，此操作不可逆。
+                </p>
+                <p style="color: #999; font-size: 13px; margin-top: 10px;">
+                    感谢您使用我们的服务！
+                </p>
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <button class="btn-confirm-success" onclick="closeDeleteSuccessModal()">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>关于我们</h3>
+                <ul><li><a href="#">公司简介</a></li><li><a href="#">联系我们</a></li><li><a href="#">加入我们</a></li><li><a href="#">新闻动态</a></li></ul>
+            </div>
+            <div class="footer-section">
+                <h3>帮助中心</h3>
+                <ul><li><a href="#">常见问题</a></li><li><a href="#">购票指南</a></li><li><a href="#">退票改签</a></li><li><a href="#">行李规定</a></li></ul>
+            </div>
+            <div class="footer-section">
+                <h3>服务条款</h3>
+                <ul><li><a href="#">用户协议</a></li><li><a href="#">隐私政策</a></li><li><a href="#">免责声明</a></li><li><a href="#">Cookie政策</a></li></ul>
+            </div>
+            <div class="footer-section">
+                <h3>联系方式</h3>
+                <ul><li>客服热线: 400-888-8888</li><li>邮箱: service@flight.com</li><li>工作时间: 24小时</li></ul>
+            </div>
+        </div>
+        <div class="footer-bottom">Copyright 2026 机票预订系统 版权所有 | 京ICP备12345678号</div>
+    </footer>
+
+    <!-- 个人信息弹窗 -->
+    <div class="profile-modal-overlay" id="profileModal">
+        <div class="profile-modal">
+            <div class="profile-modal-header">
+                <h3><i class="fas fa-user-circle" style="color: #667eea; margin-right: 10px;"></i>个人信息</h3>
+                <button class="profile-close-btn" onclick="closeProfileModal()">×</button>
+            </div>
+            <div class="profile-info-list">
+                <div class="profile-info-item">
+                    <div class="profile-info-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="profile-info-content">
+                        <div class="profile-info-label">用户名</div>
+                        <div class="profile-info-value" id="profileUsername">-</div>
+                    </div>
+                </div>
+                <div class="profile-info-item">
+                    <div class="profile-info-icon">
+                        <i class="fas fa-id-card"></i>
+                    </div>
+                    <div class="profile-info-content">
+                        <div class="profile-info-label">真实姓名</div>
+                        <div class="profile-info-value" id="profileRealName">-</div>
+                    </div>
+                    <button class="profile-edit-btn" onclick="editProfileField('realName')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+                <div class="profile-info-item">
+                    <div class="profile-info-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="profile-info-content">
+                        <div class="profile-info-label">邮箱</div>
+                        <div class="profile-info-value" id="profileEmail">-</div>
+                    </div>
+                    <button class="profile-edit-btn" onclick="editProfileField('email')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+                <div class="profile-info-item">
+                    <div class="profile-info-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div class="profile-info-content">
+                        <div class="profile-info-label">手机号</div>
+                        <div class="profile-info-value" id="profilePhone">-</div>
+                    </div>
+                    <button class="profile-edit-btn" onclick="editProfileField('phone')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+                <div class="profile-info-item">
+                    <div class="profile-info-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="profile-info-content">
+                        <div class="profile-info-label">账号状态</div>
+                        <div class="profile-info-value" id="profileStatus">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 账号管理弹窗 -->
+    <div class="profile-modal-overlay" id="accountManagementModal">
+        <div class="profile-modal">
+            <div class="profile-modal-header">
+                <h3><i class="fas fa-cog" style="color: #667eea; margin-right: 10px;"></i>账号管理</h3>
+                <button class="profile-close-btn" onclick="closeAccountManagementModal()">×</button>
+            </div>
+            <div class="profile-info-item" style="cursor: pointer;" onclick="showChangePasswordModal()">
+                <div class="profile-info-icon">
+                    <i class="fas fa-key"></i>
+                </div>
+                <div class="profile-info-content">
+                    <div class="profile-info-label">修改密码</div>
+                    <div class="profile-info-value">更改您的登录密码</div>
+                </div>
+                <i class="fas fa-chevron-right" style="color: #999; font-size: 14px;"></i>
+            </div>
+            <div class="profile-info-item" style="cursor: pointer;" onclick="showDeleteAccountConfirm()">
+                <div class="profile-info-icon" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);">
+                    <i class="fas fa-trash-alt"></i>
+                </div>
+                <div class="profile-info-content">
+                    <div class="profile-info-label">注销账号</div>
+                    <div class="profile-info-value" style="color: #ff6b6b;">永久删除您的账号</div>
+                </div>
+                <i class="fas fa-chevron-right" style="color: #999; font-size: 14px;"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- 退出登录确认弹窗 -->
+    <div class="profile-modal-overlay" id="logoutModal">
+        <div class="confirm-modal">
+            <div class="confirm-modal-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <i class="fas fa-sign-out-alt"></i>
+            </div>
+            <h3>退出登录</h3>
+            <p>确定要退出登录吗？</p>
+            <div class="confirm-modal-buttons">
+                <button class="confirm-modal-btn cancel" onclick="closeLogoutModal()">取消</button>
+                <button class="confirm-modal-btn danger" onclick="confirmLogout()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">确认退出</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 注销账号确认弹窗 -->
+    <div class="profile-modal-overlay" id="deleteAccountModal" style="z-index: 3000;">
+        <div class="confirm-modal">
+            <div class="confirm-modal-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3>注销账号</h3>
+            <p>确定要注销此账号吗？<br>此操作不可恢复，所有数据将被永久删除！</p>
+            <div class="confirm-modal-buttons">
+                <button class="confirm-modal-btn cancel" onclick="closeDeleteAccountModal()">取消</button>
+                <button class="confirm-modal-btn danger" onclick="confirmDeleteAccount()">确认注销</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 成功提示弹窗 -->
+    <div class="profile-modal-overlay" id="successModal">
+        <div class="success-modal">
+            <div class="success-modal-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <h3 id="successTitle">操作成功</h3>
+            <p id="successMessage">操作已成功完成</p>
+            <button class="success-modal-btn" onclick="closeSuccessModal()">确定</button>
+        </div>
+    </div>
+
+    <!-- 修改密码弹窗 -->
+    <div class="profile-modal-overlay" id="changePasswordModal">
+        <div class="profile-modal">
+            <div class="profile-modal-header">
+                <h3><i class="fas fa-key" style="color: #667eea; margin-right: 10px;"></i>修改密码</h3>
+                <button class="profile-close-btn" onclick="closeChangePasswordModal()">×</button>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; color: #666; font-size: 14px;">当前密码</label>
+                <input type="password" id="currentPassword" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px; transition: all 0.2s;" onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='#e0e0e0'">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; color: #666; font-size: 14px;">新密码</label>
+                <input type="password" id="newPassword" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px; transition: all 0.2s;" onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='#e0e0e0'">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; color: #666; font-size: 14px;">确认新密码</label>
+                <input type="password" id="confirmNewPassword" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px; transition: all 0.2s;" onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='#e0e0e0'">
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button onclick="closeChangePasswordModal()" style="padding: 10px 20px; border: none; background: #f5f5f5; border-radius: 8px; cursor: pointer; font-size: 15px; color: #666; transition: all 0.2s;">取消</button>
+                <button onclick="savePasswordChange()" style="padding: 10px 20px; border: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; cursor: pointer; font-size: 15px; color: #fff; transition: all 0.2s;">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑个人信息弹窗 -->
+    <div class="profile-modal-overlay" id="editProfileModal">
+        <div class="profile-modal">
+            <div class="profile-modal-header">
+                <h3 id="editProfileTitle"><i class="fas fa-edit" style="color: #667eea; margin-right: 10px;"></i>编辑</h3>
+                <button class="profile-close-btn" onclick="closeEditProfileModal()">×</button>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; color: #666; font-size: 14px;">新值</label>
+                <input type="text" id="editProfileValue" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px; transition: all 0.2s;" onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='#e0e0e0'">
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button onclick="closeEditProfileModal()" style="padding: 10px 20px; border: none; background: #f5f5f5; border-radius: 8px; cursor: pointer; font-size: 15px; color: #666; transition: all 0.2s;">取消</button>
+                <button onclick="saveProfileEdit()" style="padding: 10px 20px; border: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; cursor: pointer; font-size: 15px; color: #fff; transition: all 0.2s;">保存</button>
+            </div>
+        </div>
+    </div>
+
+        <script>
+        // 获取URL参数
+        function getUrlParam(name) { 
+            const params = new URLSearchParams(window.location.search); 
+            return params.get(name); 
+        }
+        
+        // 设置用户名
+        const username = getUrlParam('username') || '用户';
+        document.getElementById('username').textContent = username;
+        
+        // 订单状态映射
+        const statusMap = {
+            1: { label: '待支付', class: 'status-pending' },
+            2: { label: '已支付', class: 'status-confirmed' },
+            3: { label: '已完成', class: 'status-completed' },
+            4: { label: '已取消', class: 'status-canceled' },
+            5: { label: '已过期', class: 'status-expired' }
+        };
+        
+        // 全局订单数据
+        let mockOrders = [];
+        // 加载订单数据
+        async function loadOrders() {
+            try {
+                // 同时查询：购买者为当前用户 OR 乘客为当前用户
+                const buyerUrl = `http://localhost:8080/flight-booking/api/orders/buyer/${encodeURIComponent(username)}`;
+                const passengerUrl = `http://localhost:8080/flight-booking/api/orders/passenger/${encodeURIComponent(username)}`;
+                
+                console.log('加载订单:', '用户名:', username); // 调试日志
+                
+                // 并行请求两个接口
+                const [buyerRes, passengerRes] = await Promise.all([
+                    fetch(buyerUrl, { method: 'GET', headers: { 'Content-Type': 'application/json' } }),
+                    fetch(passengerUrl, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+                ]);
+
+                const buyerResult = await buyerRes.json();
+                const passengerResult = await passengerRes.json();
+
+                console.log('购买者订单:', buyerResult); // 调试日志
+                console.log('乘客订单:', passengerResult); // 调试日志
+                
+                // 合并两个结果并去重（根据订单号去重）
+                const buyerOrders = buyerResult.success ? buyerResult.data : [];
+                const passengerOrders = passengerResult.success ? passengerResult.data : [];
+                
+                // 使用Map去重，保留最新的订单
+                const orderMap = new Map();
+                
+                buyerOrders.forEach(order => {
+                    orderMap.set(order.orderNo, order);
+                });
+                
+                passengerOrders.forEach(order => {
+                    // 如果订单号已存在，不覆盖（购买者订单优先）
+                    if (!orderMap.has(order.orderNo)) {
+                        orderMap.set(order.orderNo, order);
+                    }
+                });
+                
+                mockOrders = Array.from(orderMap.values());
+                console.log('合并后的订单:', mockOrders); // 调试日志
+                
+                checkAndUpdateExpiredOrders();
+                displayOrders();
+            } catch (e) {
+                console.error('加载订单失败:', e.message);
+                mockOrders = [];
+                displayOrders();
+            }
+        }
+
+        // 检查并更新过期订单状态
+        function checkAndUpdateExpiredOrders() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // 设置为今天凌晨
+            
+            mockOrders.forEach(order => {
+                // 只有待支付和已支付状态的订单需要检查是否过期
+                if (order.status === 1 || order.status === 2) {
+                    if (order.departureDate) {
+                        const departureDate = new Date(order.departureDate);
+                        departureDate.setHours(0, 0, 0, 0);
+                        
+                        // 如果航班日期已过去，标记为已过期
+                        if (departureDate < today) {
+                            order.status = 5; // 已过期
+                            
+                            // 同步到后端
+                            updateOrderStatus(order.id, 5);
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 刷新订单列表
+        async function refreshOrders() {
+            const btn = document.getElementById('refreshBtn');
+            btn.classList.add('loading');
+            btn.innerHTML = '<i class="fas fa-sync-alt"></i> 刷新中...';
+            
+            try {
+                await loadOrders();
+                btn.innerHTML = '<i class="fas fa-check"></i> 已刷新';
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fas fa-sync-alt"></i> 刷新';
+                    btn.classList.remove('loading');
+                }, 1500);
+            } catch (error) {
+                console.error('刷新订单失败:', error);
+                btn.innerHTML = '<i class="fas fa-sync-alt"></i> 刷新';
+                btn.classList.remove('loading');
+                alert('刷新失败，请重试');
+            }
+        }
+        
+        // 更新订单状态到后端
+        function updateOrderStatus(orderId, status) {
+            fetch(`http://localhost:8080/flight-booking/api/orders/${orderId}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: status })
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (!result.success) {
+                    console.error('更新订单状态失败:', result.message);
+                }
+            })
+            .catch(error => {
+                console.error('更新订单状态失败:', error);
+            });
+        }
+
+        // 页面加载时调用（空占位，实际逻辑在下方统一处理）
+        
+
+        // 当前筛选状态
+        let currentFilter = 'all';
+        // 筛选订单
+        function filterOrders(filter) {
+            currentFilter = filter;
+            
+            // 更新标签按钮状态
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            displayOrders();
+        } 
+        // 格式化日期
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            try {
+                const date = new Date(dateStr);
+                const month = date.getMonth() + 1;
+                const day = date.getDate();
+                return `${month}月${day}日`;
+            } catch (e) {
+                return dateStr;
+            }
+        }  
+        // 格式化时间
+        function formatTime(timeStr) {
+            if (!timeStr) return '-';
+            // 处理 Date 类型或字符串类型
+            if (typeof timeStr === 'object' && timeStr instanceof Date) {
+                return timeStr.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+            }
+            // 如果是完整的日期字符串，提取时间部分
+            if (timeStr.includes('T')) {
+                return timeStr.split('T')[1]?.substring(0, 5) || timeStr;
+            }
+            return timeStr;
+        } 
+        // 显示订单列表
+        function displayOrders() {
+            const container = document.getElementById('ordersContainer');
+            // 筛选订单
+            let filteredOrders = mockOrders;
+            if (currentFilter !== 'all') {
+                const statusMapReverse = { 'pending': 1, 'confirmed': 2, 'completed': 3, 'canceled': 4, 'expired': 5 };
+                filteredOrders = mockOrders.filter(order => order.status === statusMapReverse[currentFilter]);
+            }
+            
+            if (filteredOrders.length === 0) {
+                container.innerHTML = `
+                    <div class="no-orders">
+                        <div class="no-orders-icon">📭</div>
+                        <div class="no-orders-title">暂无订单</div>
+                        <div class="no-orders-desc">当前筛选条件下没有找到订单</div>
+                        <a href="机票查询页.html?username=${encodeURIComponent(username)}" id="goBookingLink" class="no-orders-link">去预订机票</a>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = filteredOrders.map(order => `
+                <div class="order-card">
+                    <div class="order-header">
+                        <div class="order-id">订单号: ${order.orderNo || order.id}</div>
+                        <div class="order-status ${statusMap[order.status]?.class || 'status-pending'}">${statusMap[order.status]?.label || '未知'}</div>
+                    </div>
+                    
+                    <div class="order-content">
+                        <div class="flight-info">
+                            <div class="route-info">
+                                <div class="city-box">
+                                    <div class="city-date">${formatDate(order.departureDate)}</div>
+                                    <div class="city-time">${formatTime(order.departureTime)}</div>
+                                    <div class="city-name">${order.departureCity}</div>
+                                    <div class="city-code">${order.departureCode}</div>
+                                </div>
+                                <span class="route-arrow">→</span>
+                                <div class="city-box">
+                                    <div class="city-date">${formatDate(order.arrivalDate || order.departureDate)}</div>
+                                    <div class="city-time">${formatTime(order.arrivalTime)}</div>
+                                    <div class="city-name">${order.destinationCity}</div>
+                                    <div class="city-code">${order.destinationCode}</div>
+                                </div>
+                            </div>
+                            <div class="flight-details">
+                                <div class="flight-number">${order.flightNumber}</div>
+                                <div>${order.airline || '未知航空公司'}</div>
+                                <div>${getCabin(order.cabinType)}</div>
+                                <div>历时 ${order.duration || '-'}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="passenger-info">
+                            <h4>乘客信息</h4>
+                            <div class="passenger-name">${order.passengerName}</div>
+                            <div class="seat-number">座位号: ${order.seatNumber || '未分配'}</div>
+                        </div>
+                        
+                        <div class="price-info">
+                            <div style="font-size: 12px; color: #666; margin-bottom: 4px;">¥${order.price || 0} + 服务费¥${order.serviceFee || 20}</div>
+                            <div class="total-price">¥${order.totalPrice || order.price + (order.serviceFee || 20)}</div>
+                            <div class="price-label">合计</div>
+                        </div>
+                    </div>
+                    
+                    <div class="order-actions">
+                        <button class="action-btn btn-detail" onclick="viewOrderDetail('${order.id}')">查看详情</button>
+                        ${order.status === 1 ? `<button class="action-btn btn-pay" onclick="continuePayment('${order.id}')">继续支付</button>` : ''}
+                        ${order.status === 2 ? `<button class="action-btn btn-change" onclick="changeFlight('${order.id}')">改签</button>` : ''}
+                        ${order.status === 1 ? `<button class="action-btn btn-cancel" onclick="cancelOrder('${order.id}')">取消订单</button>` : ''}
+                        ${order.status === 2 ? `<button class="action-btn btn-cancel" onclick="cancelOrder('${order.id}')">退票</button>` : ''}
+                        ${order.status === 4 || order.status === 5 ? `<button class="action-btn btn-delete" onclick="deleteOrder('${order.id}')">删除记录</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+    
+
+    //继续支付功能：    
+        // 继续支付
+        function continuePayment(orderId) {
+            const order = mockOrders.find(o => o.id == orderId);
+            if (!order) return;
+            
+            // 显示支付确认弹窗
+            showPaymentModal(order);
+        }      
+        // 显示支付弹窗
+        function showPaymentModal(order) {
+            const modal = document.getElementById('paymentModal');
+            const modalBody = document.getElementById('paymentModalBody');
+            
+            // 设置弹窗标题
+            modal.querySelector('.modal-header h3').textContent = '继续支付';
+            
+            // 设置弹窗内容
+            modalBody.innerHTML = `
+                <div style="padding: 20px;">
+                    <!-- 订单信息摘要 -->
+                    <div style="background: #f8f9ff; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                            <span style="color: #666; font-size: 14px;">订单号</span>
+                            <span style="color: #667eea; font-weight: 600;">${order.orderNo}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                            <span style="color: #666; font-size: 14px;">航班</span>
+                            <span style="font-weight: 500;">${order.flightNumber}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                            <span style="color: #666; font-size: 14px;">乘客</span>
+                            <span style="font-weight: 500;">${order.passengerName}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="color: #666; font-size: 14px;">票价</span>
+                            <span style="color: #333; font-size: 14px;">¥${order.price}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="color: #666; font-size: 14px;">服务费+手续费</span>
+                            <span style="color: #333; font-size: 14px;">¥${order.serviceFee || 20}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding-top: 15px; border-top: 1px dashed #e0e0e0;">
+                            <span style="color: #333; font-size: 16px; font-weight: 600;">应付金额</span>
+                            <span style="color: #e74c3c; font-size: 24px; font-weight: 700;">¥${order.totalPrice || order.price + (order.serviceFee || 20)}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 支付方式选择 -->
+                    <div style="margin-bottom: 20px;">
+                        <p style="color: #333; font-size: 15px; font-weight: 600; margin-bottom: 15px;">选择支付方式</p>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <button class="payment-method-btn" id="wechatBtn2" onclick="selectPaymentMethod('wechat')">
+                                <div class="payment-icon" style="background: linear-gradient(135deg, #07C160 0%, #10B981 100%);">
+                                    <span style="font-size: 24px;">💚</span>
+                                </div>
+                                <span style="flex: 1; text-align: left; font-size: 15px;">微信支付</span>
+                                <div class="payment-check" id="wechatCheck2">✓</div>
+                            </button>
+                            <button class="payment-method-btn" id="alipayBtn2" onclick="selectPaymentMethod('alipay')">
+                                <div class="payment-icon" style="background: linear-gradient(135deg, #1677FF 0%, #3B82F6 100%);">
+                                    <span style="font-size: 24px;">💙</span>
+                                </div>
+                                <span style="flex: 1; text-align: left; font-size: 15px;">支付宝</span>
+                                <div class="payment-check" id="alipayCheck2">✓</div>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 测试支付按钮 -->
+                    <div>
+                        <button class="btn-test-pay" onclick="testPayment(order)">
+                            ⚡ 测试支付（直接成功）
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // 重置支付方式选择
+            selectedPaymentMethod = null;
+            currentOrderForPayment = order;
+            
+            // 显示弹窗
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        // 选择支付方式
+        let selectedPaymentMethod = null;
+        let currentOrderForPayment = null;
+        function selectPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            
+            // 更新选中状态
+            document.getElementById('wechatBtn2').classList.toggle('selected', method === 'wechat');
+            document.getElementById('alipayBtn2').classList.toggle('selected', method === 'alipay');
+            
+            // 启用支付按钮
+            const payBtn = document.querySelector('#paymentModal .btn-confirm');
+            payBtn.disabled = !selectedPaymentMethod;
+        }
+        // 提交支付
+        function submitPayment() {
+            if (!selectedPaymentMethod || !currentOrderForPayment) return;
+            
+            const btn = document.querySelector('#paymentModal .btn-confirm');
+            const originalText = btn.textContent;
+            btn.textContent = '支付中...';
+            btn.disabled = true;
+            
+            // 调用支付接口
+            fetch(`http://localhost:8080/flight-booking/api/orders/pay`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    orderNo: currentOrderForPayment.orderNo,
+                    paymentMethod: selectedPaymentMethod,
+                    amount: currentOrderForPayment.totalPrice || currentOrderForPayment.price + 20
+                })
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    // 更新本地订单状态
+                    const order = mockOrders.find(o => o.id == currentOrderForPayment.id);
+                    if (order) {
+                        order.status = 2; // 已确认
+                        order.paymentMethod = selectedPaymentMethod;
+                    }
+                    
+                    // 关闭支付弹窗
+                    closePaymentModal();
+                    
+                    // 显示支付成功弹窗
+                    showPaymentSuccess();
+                } else {
+                    alert('支付失败: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('支付失败:', error);
+                alert('支付失败，请稍后重试');
+            })
+            .finally(() => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            });
+        }
+        // 测试支付
+        function testPayment(order) {
+            currentOrderForPayment = order;
+            selectedPaymentMethod = 'test';
+            
+            const btn = document.querySelector('#paymentModal .btn-confirm');
+            const originalText = btn.textContent;
+            btn.textContent = '支付中...';
+            btn.disabled = true;
+            
+            // 调用支付接口
+            fetch(`http://localhost:8080/flight-booking/api/orders/pay`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    orderNo: order.orderNo,
+                    paymentMethod: 'test',
+                    amount: order.totalPrice || order.price + 20
+                })
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    // 更新本地订单状态
+                    const o = mockOrders.find(o => o.id == order.id);
+                    if (o) {
+                        o.status = 2; // 已确认
+                        o.paymentMethod = 'test';
+                    }
+                    
+                    // 关闭支付弹窗
+                    closePaymentModal();
+                    
+                    // 显示支付成功弹窗
+                    showPaymentSuccess();
+                } else {
+                    alert('支付失败: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('支付失败:', error);
+                alert('支付失败，请稍后重试');
+            })
+            .finally(() => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            });
+        }
+        // 关闭支付弹窗
+        function closePaymentModal() {
+            document.getElementById('paymentModal').style.display = 'none';
+            document.body.style.overflow = '';
+            selectedPaymentMethod = null;
+            currentOrderForPayment = null;
+        }
+        // 显示支付成功弹窗
+        function showPaymentSuccess() {
+            const modal = document.getElementById('paymentSuccessModal');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            
+            // 刷新订单列表，确保支付方式同步
+            setTimeout(() => {
+                loadOrders();
+            }, 500);
+        }
+        // 关闭支付成功弹窗
+        function closePaymentSuccessModal() {
+            document.getElementById('paymentSuccessModal').style.display = 'none';
+            document.body.style.overflow = '';
+            
+            // 刷新订单列表
+            loadOrders();
+        }
+
+
+    //订单详情：    
+        // 查看订单详情
+        function viewOrderDetail(orderId) {
+            const order = mockOrders.find(o => o.id == orderId);
+            if (!order) return;
+            
+            // 构建订单详情HTML
+            const detailHTML = `
+                <!-- 订单基本信息 -->
+                <div class="order-detail-section">
+                    <div class="order-detail-title">基本信息</div>
+                    <div class="order-detail-row">
+                        <span class="order-detail-label">订单号</span>
+                        <span class="order-detail-value highlight">${order.orderNo || order.id}</span>
+                    </div>
+                    <div class="order-detail-row">
+                        <span class="order-detail-label">订单状态</span>
+                        <span class="order-detail-value ${getStatusClass(order.status)}">${statusMap[order.status]?.label || '未知'}</span>
+                    </div>
+                    <div class="order-detail-row">
+                        <span class="order-detail-label">创建时间</span>
+                        <span class="order-detail-value">${order.createdAt || '未知'}</span>
+                    </div>
+                    <div class="order-detail-row">
+                        <span class="order-detail-label">购买者</span>
+                        <span class="order-detail-value">${order.buyerUsername || '未知'}</span>
+                    </div>
+                </div>
+                
+                <!-- 航班信息 -->
+                <div class="order-detail-section">
+                    <div class="order-detail-title">航班信息</div>
+                    <div class="flight-info-card">
+                        <div class="flight-route">
+                            <div class="flight-city">
+                                <div class="flight-date">${formatDate(order.arrivalDate || order.departureDate)}</div>
+                                <div class="flight-city-code">${order.departureCode || ''}</div>
+                                <div class="flight-city-name">${order.departureCity || ''}</div>
+                            </div>
+                            <div class="flight-arrow">✈️</div>
+                            <div class="flight-city">
+                                <div class="flight-date">${formatDate(order.departureDate)}</div>
+                                <div class="flight-city-code">${order.destinationCode || ''}</div>
+                                <div class="flight-city-name">${order.destinationCity || ''}</div>
+                            </div>
+                        </div>
+                        <div class="flight-duration">
+                            <span>${order.duration || ''}</span>
+                        </div>
+                    </div>
+                    <div class="order-detail-row">
+                        <span class="order-detail-label">航班号</span>
+                        <span class="order-detail-value">${order.flightNumber || '未知'}</span>
+                    </div>
+                    <div class="order-detail-row">
+                        <span class="order-detail-label">航空公司</span>
+                        <span class="order-detail-value">${order.airline || '未知'}</span>
+                    </div>
+                    <div class="order-detail-row">
+                        <span class="order-detail-label">出发日期</span>
+                        <span class="order-detail-value">${order.departureDate || '未知'}</span>
+                    </div>
+                    <div class="order-detail-row">
+                        <span class="order-detail-label">出发时间</span>
+                        <span class="order-detail-value">${formatTime(order.departureTime) || '未知'}</span>
+                    </div>
+                    <div class="order-detail-row">
+                        <span class="order-detail-label">到达日期</span>
+                        <span class="order-detail-value">${order.arrivalDate || order.departureDate || '未知'}</span>
+                    </div>
+                    <div class="order-detail-row">
+                        <span class="order-detail-label">到达时间</span>
+                        <span class="order-detail-value">${formatTime(order.arrivalTime) || '未知'}</span>
+                    </div>
+                    <div class="order-detail-row">
+                        <span class="order-detail-label">舱位</span>
+                        <span class="order-detail-value">${getCabin(order.cabinType) || '未知'}</span>
+                    </div>
+                </div>
+                
+                <!-- 乘客信息 -->
+                <div class="order-detail-section">
+                    <div class="order-detail-title">乘客信息</div>
+                    <div class="order-detail-row">
+                        <span class="order-detail-label">乘客姓名</span>
+                        <span class="order-detail-value">${order.passengerName || '未知'}</span>
+                    </div>
+                    <div class="order-detail-row">
+                        <span class="order-detail-label">身份证号</span>
+                        <span class="order-detail-value">${maskIdCard(order.passengerId) || '未知'}</span>
+                    </div>
+                    <div class="order-detail-row">
+                        <span class="order-detail-label">联系电话</span>
+                        <span class="order-detail-value">${maskPhone(order.passengerPhone) || '未知'}</span>
+                    </div>
+                    <div class="order-detail-row">
+                        <span class="order-detail-label">座位号</span>
+                        <span class="order-detail-value">${order.seatNumber || '未分配'}</span>
+                    </div>
+                </div>
+                
+                <!-- 价格信息 -->
+                <div class="order-detail-section">
+                    <div class="order-detail-title">价格信息</div>
+                    <div class="order-detail-row">
+                        <span class="order-detail-label">机票价格</span>
+                        <span class="order-detail-value">¥${order.price || 0}</span>
+                    </div>
+                    <div class="order-detail-row">
+                        <span class="order-detail-label">服务费</span>
+                        <span class="order-detail-value">¥${order.serviceFee || 20}</span>
+                    </div>
+                    <div class="order-detail-row" style="border-top: 2px solid #f0f0f0; margin-top: 10px; padding-top: 15px;">
+                        <span class="order-detail-label" style="font-weight: 600;">订单总价</span>
+                        <span class="order-detail-value highlight" style="font-size: 18px;">¥${order.totalPrice || order.price + (order.serviceFee || 20)}</span>
+                    </div>
+                </div>
+            `;
+            
+            // 设置弹窗内容
+            document.getElementById('orderDetailBody').innerHTML = detailHTML;
+            
+            // 显示弹窗
+            document.getElementById('orderDetailModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        // 关闭订单详情弹窗
+        function closeOrderDetailModal() {
+            document.getElementById('orderDetailModal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        // 获取状态样式类
+        function getStatusClass(status) {
+            switch(status) {
+                case 1: return 'warning'; // 待支付
+                case 2: return 'success'; // 已支付
+                case 3: return 'success'; // 已完成
+                case 4: return 'danger';  // 已取消
+                default: return '';
+            }
+        }
+        // 身份证号脱敏显示
+        function maskIdCard(idCard) {
+            if (!idCard) return '';
+            return idCard.replace(/(\d{4})\d{10}(\d{4})/, '$1**********$2');
+        }
+        // 手机号脱敏
+        function maskPhone(phone) {
+            if (!phone) return '';
+            return phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2');
+        }
+        // 获取支付方式名称
+        function getPaymentMethod(method) {
+            const methods = {
+                'wechat': '微信支付',
+                'alipay': '支付宝',
+                'test': '测试支付'
+            };
+            return methods[method] || method;
+        }
+        // 获取舱位名称（支持大小写）
+        function getCabin(cabinType) {
+            if (!cabinType) return '未知';
+            const cabins = {
+                'ECONOMY': '经济舱',
+                'BUSINESS': '商务舱',
+                'FIRST': '头等舱',
+                'economy': '经济舱',
+                'business': '商务舱',
+                'first': '头等舱'
+            };
+            return cabins[cabinType] || cabinType;
+        }
+
+
+    //改签功能：
+        // 改签航班
+        function changeFlight(orderId) {
+            const order = mockOrders.find(o => o.id == orderId);
+            if (!order) return;
+            
+            // 保存当前订单
+            currentChangingOrder = order;
+            
+            // 生成可选日期（未来7天）
+            const dates = generateAvailableDates(order.departureDate);
+            currentSelectedDate = dates[0].value; // 默认选中第一个可选日期
+            
+            // 获取可选航班（同航线的其他航班）
+            fetchAvailableFlights(order.departureCity, order.destinationCity, currentSelectedDate)
+                .then(flights => {
+                    // 保存航班数据
+                    availableFlights = flights;
+                    
+                    // 构建改签页面HTML（包含日期选择）
+                    const changeHTML = `
+                        <!-- 原订单信息 -->
+                        <div class="change-section">
+                            <h4 style="color: #333; font-size: 15px; font-weight: 600; margin-bottom: 15px;">原订单信息</h4>
+                            <div style="background: #f8f9ff; border-radius: 12px; padding: 15px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                    <span style="color: #666;">订单号</span>
+                                    <span style="font-weight: 500;">${order.orderNo}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                    <span style="color: #666;">原航班</span>
+                                    <span style="font-weight: 500;">${order.flightNumber}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: #666;">原日期</span>
+                                    <span style="font-weight: 500;">${order.departureDate || '未知'}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 日期选择 -->
+                        <div class="change-section" style="margin-top: 25px;">
+                            <h4 style="color: #333; font-size: 15px; font-weight: 600; margin-bottom: 15px;">选择改签日期</h4>
+                            <div style="display: flex; gap: 10px;">
+                                ${dates.map((date, index) => `
+                                    <button 
+                                        class="date-option" 
+                                        onclick="selectChangeDate('${date.value}', ${index})"
+                                        style="flex: 1; padding: 15px 8px; min-width: 0; border-radius: 10px; ${index === 0 ? 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff;' : 'background: #f5f5f5; color: #333;'}"
+                                    >
+                                        <div style="font-size: 18px; font-weight: 600;">${date.day}</div>
+                                        <div style="font-size: 12px; margin-top: 2px;">${date.weekday}</div>
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <!-- 舱位选择 -->
+                        <div class="change-section" style="margin-top: 25px;">
+                            <h4 style="color: #333; font-size: 15px; font-weight: 600; margin-bottom: 15px;">选择舱位</h4>
+                            <select id="changeCabinType" onchange="updateFlightPrices(); updateChangeFee();" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
+                                <option value="economy" ${order.cabinType === 'economy' || order.cabinType === 'ECONOMY' ? 'selected' : ''}>经济舱</option>
+                                <option value="business" ${order.cabinType === 'business' || order.cabinType === 'BUSINESS' ? 'selected' : ''}>商务舱</option>
+                                <option value="first" ${order.cabinType === 'first' || order.cabinType === 'FIRST' ? 'selected' : ''}>头等舱</option>
+                            </select>
+                        </div>
+                        
+                        <!-- 可选航班列表 -->
+                        <div class="change-section" style="margin-top: 25px;">
+                            <h4 style="color: #333; font-size: 15px; font-weight: 600; margin-bottom: 15px;">选择新航班</h4>
+                            <div style="display: flex; flex-direction: column; gap: 15px;" id="flightsContainer">
+                                ${flights.map((flight, index) => `
+                                    <div class="flight-option${index === 0 ? ' selected' : ''}" onclick="selectNewFlight(${index})">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px;">
+                                            <div style="flex: 1;">
+                                                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 8px;">
+                                                    <span style="font-size: 18px; font-weight: 600;">${flight.flightNumber}</span>
+                                                    <span style="color: #999; font-size: 13px;">${flight.airline || '未知航司'}</span>
+                                                </div>
+                                                <div style="display: flex; align-items: center; gap: 10px;">
+                                                    <span style="font-weight: 600;">${flight.departureCode}</span>
+                                                    <span>→</span>
+                                                    <span style="font-weight: 600;">${flight.destinationCode}</span>
+                                                    <span style="color: #999; margin-left: 10px;">${flight.duration}</span>
+                                                </div>
+                                            </div>
+                                            <div style="text-align: right; padding-right: 40px;">
+                                                <div style="font-size: 16px; font-weight: 600; color: #e74c3c;">¥${calculateChangeCabinPrice(flight.price || 0, order.cabinType || 'economy', flight.duration || '0小时', flight.departureCity || '', flight.destinationCity || '')}</div>
+                                            </div>
+                                        </div>
+                                        <div class="flight-radio">✓</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <!-- 改签费用说明 -->
+                        <div class="change-section" style="margin-top: 25px;">
+                            <h4 style="color: #333; font-size: 15px; font-weight: 600; margin-bottom: 15px;">改签费用</h4>
+                            <div style="background: #fff3cd; border: 1px solid #ffeeba; border-radius: 8px; padding: 15px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                    <span style="color: #856404;">原票价</span>
+                                    <span>¥${order.price}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                    <span style="color: #856404;">新票价</span>
+                                    <span>¥${flights[0]?.price || order.price}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px dashed #ffeeba;">
+                                    <span style="color: #856404; font-weight: 600;">需支付</span>
+                                    <span style="font-size: 18px; font-weight: 700; color: #e74c3c;">¥${flights[0] && flights[0].price > order.price ? flights[0].price - order.price : 0}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // 设置弹窗内容
+                    document.getElementById('changeFlightBody').innerHTML = changeHTML;
+                    
+                    // 设置默认选中第一个航班
+                    selectedNewFlight = flights[0];
+                    
+                    // 更新费用显示
+                    updateChangeFee();
+                    
+                    // 启用确认按钮
+                    document.getElementById('confirmChangeBtn').disabled = false;
+                    
+                    // 显示弹窗
+                    document.getElementById('changeFlightModal').style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                })
+                .catch(error => {
+                    console.error('获取航班失败:', error);
+                    alert('获取可选航班失败，请稍后重试');
+                });
+        }
+        // 生成可选日期（以订单日期为基准，后续改签以上一次改签后的日期为基准）
+        function generateAvailableDates(orderDate) {
+            const dates = [];
+            const today = new Date();
+            const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            
+            // 确定起始日期
+            let startDay = 1; // 默认从明天开始
+            
+            if (orderDate) {
+                const orderDateObj = new Date(orderDate);
+                
+                // 将日期设置为当天开始（去除时间部分）
+                const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                const orderDateStart = new Date(orderDateObj.getFullYear(), orderDateObj.getMonth(), orderDateObj.getDate());
+                
+                // 计算订单日期与今天的天数差
+                const diffTime = orderDateStart - todayStart;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays > 0) {
+                    // 订单日期在今天之后，从订单日期的第二天开始
+                    startDay = diffDays + 1;
+                }
+                // 如果 diffDays <= 0（订单日期在今天或之前），保持 startDay = 1（从明天开始）
+            }
+            
+            // 生成未来7天的日期
+            for (let i = startDay; i < startDay + 7; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                
+                dates.push({
+                    value: date.toISOString().split('T')[0], // YYYY-MM-DD
+                    day: date.getDate(),
+                    weekday: weekdays[date.getDay()],
+                    month: date.getMonth() + 1
+                });
+            }
+            
+            return dates;
+        }
+        // 获取可选航班（从数据库查询）
+        function fetchAvailableFlights(departure, destination, date) {
+            return new Promise((resolve, reject) => {
+                // 构建请求URL
+                const url = `http://localhost:8080/flight-booking/api/flights/search?departure=${encodeURIComponent(departure)}&destination=${encodeURIComponent(destination)}&date=${date}&sortBy=departureTime`;
+                
+                console.log('查询航班:', url); // 调试日志
+                
+                // 调用后端航班查询接口
+                fetch(url, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error(`HTTP error! status: ${res.status}`);
+                    }
+                    return res.json();
+                })
+                .then(result => {
+                    if (result.success) {
+                        // 处理返回的航班数据
+                        const flights = result.data.map(flight => ({
+                            id: flight.id,
+                            flightNumber: flight.flightNumber,
+                            departureCode: flight.departureCode,
+                            destinationCode: flight.destinationCode,
+                            departureCity: flight.departureCity,
+                            destinationCity: flight.destinationCity,
+                            departureTime: flight.departureTime,
+                            arrivalTime: flight.arrivalTime,
+                            duration: flight.duration,
+                            price: flight.price,
+                            airline: flight.airline,
+                            cabinType: flight.cabinType,
+                            availableSeats: flight.availableSeats || 10,
+                            date: date
+                        }));
+                        resolve(flights);
+                    } else {
+                        console.error('查询航班失败:', result.message);
+                        resolve([]); // 返回空数组
+                    }
+                })
+                .catch(error => {
+                    console.error('查询航班失败:', error);
+                    // 如果后端接口不可用，返回空数组或使用备用模拟数据
+                    resolve([]);
+                });
+            });
+        }
+        // 当前选中的日期
+        let currentSelectedDate = null;
+        // 可用航班数据
+        let availableFlights = [];
+        // 选择改签日期
+        function selectChangeDate(dateValue, index) {
+            // 更新选中状态
+            const dateButtons = document.querySelectorAll('.date-option');
+            dateButtons.forEach((btn, i) => {
+                if (i === index) {
+                    btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                    btn.style.color = '#fff';
+                } else {
+                    btn.style.background = '#f5f5f5';
+                    btn.style.color = '#333';
+                }
+            });
+            
+            // 更新当前选中日期
+            currentSelectedDate = dateValue;
+            
+            // 根据新日期重新加载航班
+            loadFlightsByDate(currentChangingOrder.departureCity, currentChangingOrder.destinationCity, dateValue);
+        }
+        // 根据日期加载航班
+        function loadFlightsByDate(departure, destination, date) {
+            fetchAvailableFlights(departure, destination, date)
+                .then(flights => {
+                    const container = document.getElementById('flightsContainer');
+                    
+                    if (flights.length === 0) {
+                        container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">该日期暂无可用航班</p>';
+                        document.getElementById('confirmChangeBtn').disabled = true;
+                        selectedNewFlight = null;
+                        return;
+                    }
+                    
+                    // 更新航班列表
+                    container.innerHTML = flights.map((flight, index) => `
+                        <div class="flight-option${index === 0 ? ' selected' : ''}" onclick="selectNewFlight(${index})">
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px;">
+                                <div style="flex: 1;">
+                                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 8px;">
+                                        <span style="font-size: 18px; font-weight: 600;">${flight.flightNumber}</span>
+                                        <span style="color: #999; font-size: 13px;">${flight.airline || '未知航司'}</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <span style="font-weight: 600;">${flight.departureCode}</span>
+                                        <span>→</span>
+                                        <span style="font-weight: 600;">${flight.destinationCode}</span>
+                                        <span style="color: #999; margin-left: 10px;">${flight.duration}</span>
+                                    </div>
+                                </div>
+                                <div style="text-align: right; padding-right: 40px;">
+                                    <div style="font-size: 16px; font-weight: 600; color: #e74c3c;">¥${flight.price}</div>
+                                </div>
+                            </div>
+                            <div class="flight-radio">✓</div>
+                        </div>
+                    `).join('');
+                    
+
+                    // 设置默认选中第一个航班
+                    selectedNewFlight = flights[0];
+
+                    // 更新费用显示
+                    updateChangeFee();
+
+                    // 启用确认按钮
+                    document.getElementById('confirmChangeBtn').disabled = false;
+                }
+            );
+        }
+        // 选择新航班
+        let selectedNewFlight = null;
+        let currentChangingOrder = null;
+        function selectNewFlight(index) {
+            const flights = document.querySelectorAll('.flight-option');
+            
+            flights.forEach((flight, i) => {
+                // 使用类来控制选中状态
+                if (i === index) {
+                    flight.classList.add('selected');
+                } else {
+                    flight.classList.remove('selected');
+                }
+            });
+            
+            // 更新选中的航班（通过重新获取航班数据）
+            fetchAvailableFlights(currentChangingOrder.departureCity, currentChangingOrder.destinationCity, currentSelectedDate)
+                .then(flights => {
+                    selectedNewFlight = flights[index];
+                
+                    // 更新费用栏
+                    updateChangeFee();
+                
+                    // 启用确认按钮
+                    document.getElementById('confirmChangeBtn').disabled = false;
+                }
+            );
+        }
+        // 动态更新航班列表票价
+        function updateFlightPrices() {
+            if (!currentChangingOrder || !availableFlights || availableFlights.length === 0) return;
+            
+            const cabinType = document.getElementById('changeCabinType').value;
+            const flightOptions = document.querySelectorAll('.flight-option');
+            
+            flightOptions.forEach((option, index) => {
+                // 获取航班数据
+                const flight = availableFlights[index];
+                if (!flight) return;
+                
+                try {
+                    // 计算该舱位的价格
+                    const cabinPrice = calculateChangeCabinPrice(flight.price || 0, cabinType, flight.duration || '0小时',
+                        flight.departureCity || '', flight.destinationCity || '');
+                    
+                    // 更新票价显示
+                    const priceContainer = option.querySelector('[style="text-align: right; padding-right: 40px;"]');
+                    if (priceContainer) {
+                        const priceElement = priceContainer.querySelector('div:first-child');
+                        if (priceElement) {
+                            priceElement.textContent = `¥${cabinPrice}`;
+                        }
+                    }
+                } catch (error) {
+                    console.error('更新航班票价失败:', error);
+                }
+            });
+        }
+        
+        // 更新改签费用
+        function updateChangeFee() {
+            if (!selectedNewFlight || !currentChangingOrder) return;
+            
+            // 获取选择的舱位
+            const cabinType = document.getElementById('changeCabinType').value;
+            
+            // 判断是否升舱/降舱
+            const cabinLevels = { economy: 1, business: 2, first: 3 };
+            const originalCabin = currentChangingOrder.cabinType || 'economy';
+            const isUpgrade = cabinLevels[cabinType] > cabinLevels[originalCabin];
+            const isDowngrade = cabinLevels[cabinType] < cabinLevels[originalCabin];
+            const isSameCabin = cabinLevels[cabinType] === cabinLevels[originalCabin];
+            
+            // 计算舱位价格
+            const cabinPrice = calculateChangeCabinPrice(selectedNewFlight.price, cabinType, selectedNewFlight.duration, 
+                selectedNewFlight.departureCity, selectedNewFlight.destinationCity);
+            
+            // 计算差价
+            // 升舱：新舱位价格 - 原订单价格
+            // 同舱：新航班价格 - 原订单价格（价高补足，价低不退）
+            // 降舱：保持原票价，差价不予退还
+            let priceDiff = 0;
+            let finalPrice = cabinPrice;
+            
+            if (isUpgrade) {
+                priceDiff = cabinPrice - currentChangingOrder.price;
+                finalPrice = cabinPrice;
+            } else if (isSameCabin) {
+                // 同舱位更换航班，价高补足，价低不退
+                if (cabinPrice > currentChangingOrder.price) {
+                    priceDiff = cabinPrice - currentChangingOrder.price;
+                    finalPrice = cabinPrice;
+                } else {
+                    // 价低不退，保持原票价
+                    priceDiff = 0;
+                    finalPrice = currentChangingOrder.price;
+                }
+            } else if (isDowngrade) {
+                // 降舱保持原票价
+                priceDiff = 0;
+                finalPrice = currentChangingOrder.price;
+            }
+            
+            // 手续费（固定20元）
+            const serviceFee = 20;
+            
+            // 计算需支付金额
+            // 升舱/同舱价高：需支付差价 + 手续费
+            // 降舱/同舱价低：只收手续费
+            const totalPayment = priceDiff > 0 ? priceDiff + serviceFee : serviceFee;
+            
+            // 更新费用区域
+            const changeSection = document.querySelector('.change-section:last-child');
+            changeSection.innerHTML = `
+                <h4 style="color: #333; font-size: 15px; font-weight: 600; margin-bottom: 15px;">改签费用</h4>
+                <div style="background: #fff3cd; border: 1px solid #ffeeba; border-radius: 8px; padding: 15px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="color: #856404;">原票价</span>
+                        <span>¥${currentChangingOrder.price} (${getCabin(originalCabin)})</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="color: #856404;">新票价</span>
+                        <span>¥${finalPrice} (${getCabin(cabinType)}${isDowngrade ? '<span style="color: #e74c3c; font-size: 12px; margin-left: 5px;">(自愿降舱)</span>' : ''}${isSameCabin && cabinPrice < currentChangingOrder.price ? '<span style="color: #999; font-size: 12px; margin-left: 5px;">(价低不退)</span>' : ''})</span>
+                    </div>
+                    ${priceDiff > 0 ? `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="color: #856404;">${isUpgrade ? '升舱差价' : '航班差价'}</span>
+                        <span style="color: #e74c3c;">+¥${priceDiff}</span>
+                    </div>
+                    ` : ''}
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="color: #856404;">手续费</span>
+                        <span>¥${serviceFee}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px dashed #ffeeba;">
+                        <span style="color: #856404; font-weight: 600;">需支付</span>
+                        <span style="font-size: 18px; font-weight: 700; color: #e74c3c;">¥${totalPayment}</span>
+                    </div>
+                </div>
+            `;
+            
+            // 保存当前计算的价格用于确认改签
+            window.changeCabinPrice = finalPrice;
+            window.changeTotalPayment = totalPayment;
+        }
+        
+        // 计算改签舱位价格
+        function calculateChangeCabinPrice(basePrice, cabinType, duration, departureCity, destinationCity) {
+            // 判断是否为国际航班
+            const domesticCities = ['北京', '上海', '广州', '深圳', '成都', '杭州', '重庆', '西安', '武汉', '南京'];
+            const isInternational = !domesticCities.includes(departureCity) || !domesticCities.includes(destinationCity);
+            
+            // 解析飞行时间
+            const durationMatch = duration.match(/(\d+)小时(?:(\d+)分)?/);
+            const hours = durationMatch ? parseInt(durationMatch[1]) + (durationMatch[2] ? parseInt(durationMatch[2]) / 60 : 0) : 0;
+            
+            // 根据舱位类型和条件计算价格
+            let multiplier = 1;
+            if (cabinType === 'business') {
+                if (isInternational) {
+                    multiplier = 4;
+                } else if (hours <= 3) {
+                    multiplier = 2;
+                } else {
+                    multiplier = 3;
+                }
+            } else if (cabinType === 'first') {
+                if (isInternational) {
+                    multiplier = 9;
+                } else if (hours <= 3) {
+                    multiplier = 4;
+                } else {
+                    multiplier = 6;
+                }
+            }
+            
+            return Math.round(basePrice * multiplier);
+        }
+        // 确认改签
+        function confirmChangeFlight() {
+            if (!selectedNewFlight || !currentChangingOrder || !currentSelectedDate) return;
+            
+            const btn = document.getElementById('confirmChangeBtn');
+            const originalText = btn.textContent;
+            btn.textContent = '处理中...';
+            btn.disabled = true;
+            
+            // 获取选择的舱位
+            const cabinType = document.getElementById('changeCabinType').value;
+            const cabinPrice = window.changeCabinPrice || selectedNewFlight.price;
+            
+            // 调用改签接口
+            fetch(`http://localhost:8080/flight-booking/api/orders/${currentChangingOrder.id}/change`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    newFlightId: selectedNewFlight.id,
+                    newFlightNumber: selectedNewFlight.flightNumber,
+                    newDepartureDate: currentSelectedDate,
+                    newDepartureTime: selectedNewFlight.departureTime,
+                    newArrivalTime: selectedNewFlight.arrivalTime,
+                    newCabinType: cabinType,
+                    newPrice: cabinPrice,
+                    difference: window.changeTotalPayment || (cabinPrice - currentChangingOrder.price)
+                })
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    // 更新本地订单信息
+                    const order = mockOrders.find(o => o.id == currentChangingOrder.id);
+                    if (order) {
+                        order.flightNumber = selectedNewFlight.flightNumber;
+                        order.departureDate = currentSelectedDate; // 更新日期
+                        order.departureTime = selectedNewFlight.departureTime;
+                        order.arrivalTime = selectedNewFlight.arrivalTime;
+                        order.cabinType = cabinType; // 更新舱位类型
+                        order.price = cabinPrice; // 更新舱位价格
+                        order.totalPrice = cabinPrice + (order.serviceFee || 20); // 更新总价
+                    }
+                    
+                    // 刷新订单列表显示
+                    displayOrders();
+                    
+                    // 关闭改签弹窗
+                    closeChangeFlightModal();
+                    
+                    // 显示改签成功弹窗
+                    showChangeSuccessModal();
+                } else {
+                    alert('改签失败: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('改签失败:', error);
+                alert('改签失败，请稍后重试');
+            })
+            .finally(() => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            });
+        }
+        // 关闭改签弹窗
+        function closeChangeFlightModal() {
+            document.getElementById('changeFlightModal').style.display = 'none';
+            document.body.style.overflow = '';
+            selectedNewFlight = null;
+            currentChangingOrder = null;
+        }
+        // 显示改签成功弹窗
+        function showChangeSuccessModal() {
+            document.getElementById('changeSuccessModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        // 关闭改签成功弹窗
+        function closeChangeSuccessModal() {
+            document.getElementById('changeSuccessModal').style.display = 'none';
+            document.body.style.overflow = '';
+            
+            // 刷新订单列表
+            loadOrders();
+        }
+
+
+    //取消订单功能：
+        // 记录当前正在取消的订单ID
+        let cancelingOrderId = null;
+        // 取消订单（带确认模态框）
+        function cancelOrder(orderId) {
+            const order = mockOrders.find(o => o.id == orderId);
+            if (!order) return;
+    
+            cancelingOrderId = orderId;
+    
+            // 显示订单信息
+            document.getElementById('cancelOrderInfo').innerHTML = `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="color: #856404;">订单号:</span>
+                    <span style="font-weight: 600;">${order.orderNo || order.id}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="color: #856404;">航班:</span>
+                    <span>${order.flightNumber}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="color: #856404;">乘客:</span>
+                    <span>${order.passengerName}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="color: #856404;">出发地:</span>
+                    <span>${order.departureCity} ${order.departureCode}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: #856404;">目的地:</span>
+                    <span>${order.destinationCity} ${order.destinationCode}</span>
+                </div>
+            `;
+    
+            document.getElementById('cancelModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        // 关闭取消确认模态框
+        function closeCancelModal() {
+            document.getElementById('cancelModal').style.display = 'none';
+            document.body.style.overflow = '';
+            cancelingOrderId = null;
+        }
+        // 确认取消订单
+        function confirmCancelOrder() {
+            if (!cancelingOrderId) return;
+    
+            const btn = document.querySelector('.btn-cancel-order');
+            const originalText = btn.textContent;
+            btn.textContent = '处理中...';
+            btn.disabled = true;
+    
+            fetch(`http://localhost:8080/flight-booking/api/orders/${cancelingOrderId}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 4 })
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    const order = mockOrders.find(o => o.id == cancelingOrderId);
+                    if (order) {
+                        order.status = 4;
+                    }
+                    displayOrders();
+                    closeCancelModal();  // 先关闭取消确认弹窗
+                    showCancelSuccessModal();  // 显示成功弹窗
+                } else {
+                    alert('取消订单失败: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('取消订单失败:', error);
+                alert('取消订单失败，请稍后重试');
+            })
+            .finally(() => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            });
+        }
+        // 显示订单取消成功弹窗
+        function showCancelSuccessModal() {
+            document.getElementById('cancelSuccessModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        // 关闭订单取消成功弹窗并刷新页面
+        function closeCancelSuccessModal() {
+            document.getElementById('cancelSuccessModal').style.display = 'none';
+            document.body.style.overflow = '';
+            window.location.reload();
+        }
+        
+
+    //删除订单功能：
+        // 记录当前正在删除的订单ID
+        let deletingOrderId = null;
+        // 删除订单（带确认模态框）
+        function deleteOrder(orderId) {
+            const order = mockOrders.find(o => o.id == orderId);
+            if (!order) return;
+    
+            deletingOrderId = orderId;
+    
+            // 显示订单信息
+            document.getElementById('deleteOrderInfo').innerHTML = `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="color: #856404;">订单号:</span>
+                    <span style="font-weight: 600;">${order.orderNo || order.id}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="color: #856404;">航班:</span>
+                    <span>${order.flightNumber}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="color: #856404;">乘客:</span>
+                    <span>${order.passengerName}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: #856404;">金额:</span>
+                    <span style="color: #e53935; font-weight: 600;">¥${order.price}</span>
+                </div>
+            `;
+    
+            document.getElementById('deleteModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        // 关闭删除确认模态框
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+            document.body.style.overflow = '';
+            deletingOrderId = null;
+        }
+        // 确认删除订单
+        function confirmDeleteOrder() {
+            if (!deletingOrderId) return;
+    
+            const btn = document.querySelector('.btn-delete-modal');
+            const originalText = btn.textContent;
+            btn.textContent = '删除中...';
+            btn.disabled = true;
+    
+            fetch(`http://localhost:8080/flight-booking/api/orders/${deletingOrderId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    // 从本地列表中移除订单
+                    mockOrders = mockOrders.filter(o => o.id != deletingOrderId);
+                    displayOrders();
+                    closeDeleteModal();
+                    showDeleteSuccessModal();
+                } else {
+                    alert('删除失败: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('删除失败:', error);
+                alert('删除失败，请稍后重试');
+            })
+            .finally(() => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            });
+        }
+        // 显示删除成功弹窗
+        function showDeleteSuccessModal() {
+            document.getElementById('deleteSuccessModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        // 关闭删除成功弹窗
+        function closeDeleteSuccessModal() {
+            document.getElementById('deleteSuccessModal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+
+    //通用功能：
+        // 点击模态框外部关闭
+        document.addEventListener('click', function(e) {
+            const deleteModal = document.getElementById('deleteModal');
+            if (deleteModal && e.target === deleteModal) {
+                closeDeleteModal();
+            }
+        });
+
+        // 退出登录
+        function logout() {
+            document.getElementById('logoutModal').style.zIndex = '3500';
+            document.getElementById('logoutModal').classList.add('show');
+        }
+
+        // 关闭退出登录弹窗
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').classList.remove('show');
+        }
+
+        // 确认退出登录
+        function confirmLogout() {
+            closeLogoutModal();
+            window.location.href = '系统登录页.html';
+        }
+
+        // 切换用户菜单显示/隐藏
+        function toggleUserMenu() {
+            const menu = document.getElementById('userDropdownMenu');
+            menu.classList.toggle('show');
+        }
+
+        // 点击其他地方关闭菜单
+        document.addEventListener('click', function(event) {
+            const dropdown = document.querySelector('.user-dropdown');
+            const menu = document.getElementById('userDropdownMenu');
+            if (!dropdown.contains(event.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
+        // 显示个人信息
+        function showProfile() {
+            toggleUserMenu();
+            loadUserProfile();
+        }
+
+        // 加载用户个人信息
+        function loadUserProfile() {
+            const userId = sessionStorage.getItem('userId') || localStorage.getItem('userId') || 1;
+            fetch(`http://localhost:8080/flight-booking/api/users/${userId}`)
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success) {
+                        const user = result.data;
+                        document.getElementById('profileUsername').textContent = user.username || '-';
+                        document.getElementById('profileRealName').textContent = user.realName || '未设置';
+                        document.getElementById('profileEmail').textContent = user.email || '未设置';
+                        document.getElementById('profilePhone').textContent = user.phone || '未设置';
+                        document.getElementById('profileStatus').textContent = user.status === 1 ? '正常' : '已禁用';
+                        
+                        // 显示弹窗
+                        document.getElementById('profileModal').classList.add('show');
+                    } else {
+                        alert('获取个人信息失败: ' + result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('获取个人信息失败:', error);
+                    alert('获取个人信息失败，请检查网络连接');
+                });
+        }
+
+        // 关闭个人信息弹窗
+        function closeProfileModal() {
+            document.getElementById('profileModal').classList.remove('show');
+        }
+
+        // 点击弹窗外部关闭
+        document.getElementById('profileModal')?.addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeProfileModal();
+            }
+        });
+
+        // 当前编辑的字段
+        let currentEditField = '';
+
+        // 编辑个人信息字段
+        function editProfileField(field) {
+            currentEditField = field;
+            const fieldNames = {
+                'realName': '真实姓名',
+                'email': '邮箱',
+                'phone': '手机号'
+            };
+            document.getElementById('editProfileTitle').innerHTML = `<i class="fas fa-edit" style="color: #667eea; margin-right: 10px;"></i>编辑${fieldNames[field]}`;
+            document.getElementById('editProfileValue').value = document.getElementById('profile' + field.charAt(0).toUpperCase() + field.slice(1)).textContent;
+            document.getElementById('editProfileModal').classList.add('show');
+        }
+
+        // 关闭编辑弹窗
+        function closeEditProfileModal() {
+            document.getElementById('editProfileModal').classList.remove('show');
+        }
+
+        // 保存个人信息修改
+        function saveProfileEdit() {
+            const userId = sessionStorage.getItem('userId') || localStorage.getItem('userId') || 1;
+            const newValue = document.getElementById('editProfileValue').value.trim();
+            
+            if (!newValue) {
+                alert('值不能为空');
+                return;
+            }
+
+            // 验证邮箱格式
+            if (currentEditField === 'email' && !newValue.includes('@')) {
+                alert('邮箱格式不正确');
+                return;
+            }
+
+            // 验证手机号格式
+            if (currentEditField === 'phone' && !/^1[3-9]\d{9}$/.test(newValue)) {
+                alert('手机号格式不正确');
+                return;
+            }
+
+            fetch(`http://localhost:8080/flight-booking/api/users/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    [currentEditField]: newValue
+                })
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    alert('修改成功');
+                    closeEditProfileModal();
+                    loadUserProfile(); // 重新加载用户信息
+                } else {
+                    alert('修改失败: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('修改失败:', error);
+                alert('修改失败，请检查网络连接');
+            });
+        }
+
+        // 点击编辑弹窗外部关闭
+        document.getElementById('editProfileModal')?.addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeEditProfileModal();
+            }
+        });
+
+        // 显示账号管理
+        function showAccountManagement() {
+            toggleUserMenu();
+            document.getElementById('accountManagementModal').classList.add('show');
+        }
+
+        // 关闭账号管理弹窗
+        function closeAccountManagementModal() {
+            document.getElementById('accountManagementModal').classList.remove('show');
+        }
+
+        // 显示修改密码弹窗
+        function showChangePasswordModal() {
+            document.getElementById('changePasswordModal').style.zIndex = '4000';
+            document.getElementById('changePasswordModal').classList.add('show');
+        }
+
+        // 关闭修改密码弹窗
+        function closeChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.remove('show');
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+        }
+
+        // 保存密码修改
+        function savePasswordChange() {
+            const userId = sessionStorage.getItem('userId') || localStorage.getItem('userId');
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+            if (!currentPassword || !newPassword || !confirmNewPassword) {
+                alert('请填写所有字段');
+                return;
+            }
+
+            if (newPassword !== confirmNewPassword) {
+                alert('两次输入的新密码不一致');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                alert('新密码长度不能少于6位');
+                return;
+            }
+
+            fetch(`http://localhost:8080/flight-booking/api/users/${userId}/password`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    oldPassword: currentPassword,
+                    newPassword: newPassword
+                })
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    closeChangePasswordModal();
+                    closeAccountManagementModal();
+                    showSuccessModal('密码修改成功', '请重新登录');
+                    setTimeout(() => {
+                        logout();
+                    }, 1500);
+                } else {
+                    alert('密码修改失败: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('密码修改失败:', error);
+                alert('密码修改失败，请检查网络连接');
+            });
+        }
+
+        // 显示注销账号确认
+        function showDeleteAccountConfirm() {
+            document.getElementById('deleteAccountModal').classList.add('show');
+        }
+
+        // 关闭注销账号确认弹窗
+        function closeDeleteAccountModal() {
+            document.getElementById('deleteAccountModal').classList.remove('show');
+        }
+
+        // 确认注销账号
+        function confirmDeleteAccount() {
+            const userId = sessionStorage.getItem('userId') || localStorage.getItem('userId');
+            fetch(`http://localhost:8080/flight-booking/api/users/${userId}`, {
+                method: 'DELETE'
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    closeDeleteAccountModal();
+                    closeAccountManagementModal();
+                    showSuccessModal('账号已注销', '您的账号已成功注销');
+                    setTimeout(() => {
+                        logout();
+                    }, 1500);
+                } else {
+                    alert('账号注销失败: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('账号注销失败:', error);
+                alert('账号注销失败，请检查网络连接');
+            });
+        }
+
+        // 显示成功提示
+        function showSuccessModal(title, message) {
+            document.getElementById('successTitle').textContent = title || '操作成功';
+            document.getElementById('successMessage').textContent = message || '操作已成功完成';
+            document.getElementById('successModal').style.zIndex = '5000';
+            document.getElementById('successModal').classList.add('show');
+        }
+
+        // 关闭成功提示弹窗
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.remove('show');
+        }
+
+        // 显示帮助中心
+        function showHelpCenter() {
+            window.location.href = '帮助中心页.html';
+        }
+        
+        // 加载未读消息数量
+        function loadUnreadMessageCount() {
+            // 从sessionStorage获取当前用户ID（每个标签页独立）
+            const userId = parseInt(sessionStorage.getItem('userId') || localStorage.getItem('userId')) || 1;
+            fetch(`http://localhost:8080/flight-booking/api/messages/unread-count?userId=${userId}`)
+                .then(res => res.json())
+                .then(result => {
+                    const badge = document.getElementById('messageBadge');
+                    if (result.success && result.data.unreadCount > 0) {
+                        badge.textContent = result.data.unreadCount;
+                        badge.style.display = 'inline';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('获取未读消息数量失败:', error));
+        }
+        
+        // 动态更新导航链接，添加用户名参数
+        function updateNavLinks() {
+            const navLinks = document.querySelectorAll('.nav-links a');
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && href !== '#' && !href.includes('username=')) {
+                    link.setAttribute('href', href + '?username=' + encodeURIComponent(username));
+                }
+            });
+            // 更新"去预订机票"链接
+            const goBookingLink = document.getElementById('goBookingLink');
+            if (goBookingLink) {
+                const href = goBookingLink.getAttribute('href');
+                if (href && !href.includes('username=')) {
+                    goBookingLink.setAttribute('href', href + '?username=' + encodeURIComponent(username));
+                }
+            }
+        }
+        
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNavLinks();
+            loadOrders();
+            loadUnreadMessageCount();
+            // 每30秒自动刷新一次未读消息数量
+            setInterval(loadUnreadMessageCount, 30000);
+        });
+    </script>
+</body>
+</html>

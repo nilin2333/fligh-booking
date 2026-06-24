@@ -1,0 +1,20 @@
+机票预定系统/
+├── 前端页面/              # 静态 HTML 页面
+│   ├── 系统首页.html
+│   ├── 系统登录页.html
+│   ├── 系统注册页.html
+│   └── 系统忘记密码页.html
+├── 后端代码/              # Spring Boot 后端
+│   ├── pom.xml
+│   └── src/main/
+│       ├── java/com/flightbooking/
+│       │   ├── Application.java
+│       │   ├── controller/
+│       │   ├── service/
+│       │   ├── repository/
+│       │   ├── entity/
+│       │   └── dto/
+│       └── resources/
+│           └── application.yml
+└── 数据库/
+    └── DataBase.sql
