@@ -1554,7 +1554,9 @@
             const index = select.value;
             
             if (index !== '') {
-                const savedPassengers = localStorage.getItem('passengers');
+                // 使用用户名作为key，与乘客管理页保持一致
+                const passengersKey = `${username}_passengers`;
+                const savedPassengers = localStorage.getItem(passengersKey);
                 const passengers = savedPassengers ? JSON.parse(savedPassengers) : [];
                 const passenger = passengers[index];
                 
