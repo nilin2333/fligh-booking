@@ -206,7 +206,7 @@ server:
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/flight_booking_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8
-    username: root                         # 数据库用户名
+    username: your_name                    # 数据库用户名
     password: your_password                # 数据库密码
 
   jpa:
